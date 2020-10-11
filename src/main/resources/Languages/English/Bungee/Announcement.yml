@@ -1,0 +1,24 @@
+#Announcements priority. (From top to bottom)
+Priority:
+- example-announcement
+
+Announcements:
+    example-announcement:
+        #Announcement's name
+        Name: 'Example'
+        #Permission to receive this announcement (deleting this option means no permission is required)
+        Permission: liteannouncer.announcement.example
+        #Delay announcement (unit: seconds, decimals allowed)
+        Delay: 60
+        #Whitelist server (only the following servers can see this announcement)
+        Whitelist-Server:
+            #Whether to enable.
+            Enabled: false
+            #Server list.
+            Servers:
+            - 'Lobby'
+        #Announcement's contents
+        Messages:
+        - '&8▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬'
+        - '  &c# &aThis is an example of announcement %example_json_component%'
+        - '&8▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬'

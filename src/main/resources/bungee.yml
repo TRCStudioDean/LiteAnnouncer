@@ -1,0 +1,8 @@
+name: LiteAnnouncer
+version: 1.0.0
+author: TRCStudioDean
+main: studio.trc.bungee.liteannouncer.Main
+commands:
+    la:
+        description: 'LiteAnnouncer main command.'
+        aliases: [liteannouncer]

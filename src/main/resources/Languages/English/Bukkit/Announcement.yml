@@ -1,0 +1,17 @@
+#Announcements priority. (From top to bottom)
+Priority:
+- example-announcement
+
+Announcements:
+    example-announcement:
+        #Announcement's name
+        Name: 'Example'
+        #Permission to receive this announcement (deleting this option means no permission is required)
+        Permission: liteannouncer.announcement.example
+        #Delay announcement (unit: seconds, decimals allowed)
+        Delay: 60
+        #Announcement's contents
+        Messages:
+        - '&8▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬'
+        - '  &c# &aThis is an example of announcement %example_json_component%'
+        - '&8▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬'

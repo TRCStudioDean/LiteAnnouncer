@@ -1,0 +1,10 @@
+name: LiteAnnouncer
+version: 1.0.0
+author: TRCStudioDean
+main: studio.trc.bukkit.liteannouncer.Main
+api-version: 1.13
+softdepend: [PlaceholderAPI]
+commands:
+    la:
+        description: 'LiteAnnouncer main command.'
+        aliases: [liteannouncer]

@@ -1,0 +1,30 @@
+#Json Component editor.
+Json-Components:
+    example:
+        #Placeholder's name
+        Placeholder: '%example_json_component%'
+        #Text information
+        Text: '&a[JsonComponent]'
+        #Click event.
+        ClickEvent:
+            #Availables: OPEN_URL, OPEN_FILE, RUN_COMMAND, SUGGEST_COMMAND, CHANGE_PAGE, COPY_TO_CLIPBOARD
+            #  OPEN_URL: Click to open a URL link. (for example: https://www.google.com/ Open the official website of your server)
+            #  OPEN_FILE: Click to open a local file.
+            #  RUN_COMMAND: Click to run command.
+            #  SUGGEST_COMMAND: Click to fill command/message in the chat bar
+            #  CHANGE_PAGE: Click to change the book page.
+            #  COPY_TO_CLIPBOARD: Click to copy to clipboard.
+            Action: RUN_COMMAND
+            #Target value.
+            Value: '/say hello!'
+        #Hover event.
+        HoverEvent:
+            #Availables: SHOW_TEXT, SHOW_ACHIEVEMENT, SHOW_ITEM, SHOW_ENTITY
+            #  SHOW_TEXT: Show text.
+            #  SHOW_ACHIEVEMENT: Show text at achievements format.
+            #  SHOW_ITEM: Show text at items format.
+            #  SHOW_ENTITY: Show text at entitys format.
+            Action: SHOW_TEXT
+            #When the mouse moves over the message.
+            Hover-Values: 
+            - '&6This is a default message~'

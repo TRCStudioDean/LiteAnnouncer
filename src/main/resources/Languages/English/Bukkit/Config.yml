@@ -1,0 +1,26 @@
+#Command prefix
+Prefix: '&aLite&eAnnouncer &f&l>>> '
+
+#Plugin language
+#Provide Chinese and English by default
+Language: English
+
+#Whether to use the PlaceholderAPI
+Use-PlaceholderAPI: true
+
+Permissions:
+    #Commands permission settings.
+    Commands:
+        Help: 
+            Permission: liteannouncer.command.help
+            #Whether to have permission by default.
+            Default: true
+        Reload: 
+            Permission: liteannouncer.command.reload
+            Default: false
+        View: 
+            Permission: liteannouncer.command.view
+            Default: false
+        List: 
+            Permission: liteannouncer.command.list
+            Default: false
