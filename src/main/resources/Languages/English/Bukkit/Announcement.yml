@@ -10,8 +10,54 @@ Announcements:
         Permission: liteannouncer.announcement.example
         #Delay announcement (unit: seconds, decimals allowed)
         Delay: 60
-        #Announcement's contents
+        #Announcement's messages.
         Messages:
         - '&8▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬'
         - '  &c# &aThis is an example of announcement %example_json_component%'
         - '&8▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬'
+        #Announcement's title message.
+        Titles:
+            Enabled: false
+            Titles-Setting:
+                'example_1':
+                    Delay: 0.3
+                    Fade-In: 0
+                    Stay: 0.4
+                    Fade-Out: 0
+                    Title: '&a&lThis is a title~'
+                    Sub-Title: '&e&lThis is a sub title~'
+                'example_2':
+                    Delay: 0.3
+                    Fade-In: 0
+                    Stay: 0.4
+                    Fade-Out: 0
+                    Title: '&b&lThis is a title~'
+                    Sub-Title: '&f&lThis is a sub title~'
+            Task-Sequence:
+            - 'example_1'
+            - 'example_2'
+            - 'example_1'
+            - 'example_2'
+            - 'example_1'
+            - 'example_2'
+        #Announcement's action-bar message.
+        ActionBars: 
+            Enabled: false
+            Task-Sequence:
+            #List of messages (format: [message]:[delay])
+            - '&a&lThis is an example of action bar text': 0.2
+            - '&b&lThis is an example of action bar text': 0.2
+            - '&c&lThis is an example of action bar text': 0.2
+            - '&d&lThis is an example of action bar text': 0.2
+            - '&e&lThis is an example of action bar text': 0.2
+            - '&a&lThis is an example of action bar text': 0.2
+            - '&b&lThis is an example of action bar text': 0.2
+            - '&c&lThis is an example of action bar text': 0.2
+            - '&d&lThis is an example of action bar text': 0.2
+            - '&e&lThis is an example of action bar text': 0.2
+            - '&a&lThis is an example of action bar text': 0.2
+            - '&b&lThis is an example of action bar text': 0.2
+            - '&c&lThis is an example of action bar text': 0.2
+            - '&d&lThis is an example of action bar text': 0.2
+            - '&e&lThis is an example of action bar text': 0.2
+            - '&r': 0.2

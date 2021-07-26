@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map;
 
 import org.bukkit.configuration.InvalidConfigurationException;
@@ -12,7 +11,7 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 import studio.trc.bukkit.liteannouncer.Main;
-import studio.trc.bukkit.liteannouncer.util.LiteAnnouncerProperties;
+import studio.trc.bukkit.liteannouncer.util.MessageUtil;
 
 public class DefaultConfigurationFile
 {
@@ -28,13 +27,9 @@ public class DefaultConfigurationFile
     }
     
     public static void loadDefaultConfigurationFile(ConfigurationType type) {
-        Locale lang = LiteAnnouncerProperties.lang;
-        String jarPath = "English";
-        if (lang.equals(Locale.SIMPLIFIED_CHINESE) || lang.equals(Locale.CHINESE)) {
-            jarPath = "Chinese";
-        }
+        String jarPath = MessageUtil.Language.getLocaleLanguage().getFolderName();
         String fileName = type.getFileName();
-        try (Reader Config = new InputStreamReader(Main.getInstance().getClass().getResource("/Languages/" + jarPath + "/" + fileName).openStream(), "UTF-8")) {
+        try (Reader Config = new InputStreamReader(Main.getInstance().getClass().getResource("/Languages/" + jarPath + "/Bungee/" + fileName).openStream(), "UTF-8")) {
             FileConfiguration configFile = new YamlConfiguration();
             configFile.load(Config);
             cacheDefaultConfig.put(type, configFile);

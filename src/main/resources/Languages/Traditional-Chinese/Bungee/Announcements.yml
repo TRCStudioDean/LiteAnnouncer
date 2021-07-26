@@ -1,0 +1,92 @@
+#公告的優先級，順序是從上往下
+Priority:
+- example-announcement
+
+Announcements:
+    example-announcement:
+        #公告的名字
+        Name: '示例公告'
+        #接收本公告的權限（刪除掉本選項即為無需權限）
+        Permission: liteannouncer.announcement.example
+        #延遲公告（單位: 秒 允許使用小數）
+        Delay: 60
+        #白名單伺服器（只有以下伺服器才可以看得見此公告）
+        Whitelist-Server:
+            #是否啟用
+            Enabled: false
+            #伺服器列表
+            Servers:
+            - 'Lobby'
+        #公告的消息內容
+        Messages:
+        - '&8▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬'
+        - ' &c# &a這是一條示範用的伺服器公告 %example_json_component%'
+        - '&8▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬'
+        #標題信息
+        Titles:
+            #是否啟用
+            Enabled: false
+            #標題設置
+            Titles-Setting:
+                'example_1':
+                    #顯示延遲（秒）
+                    Delay: 0.3
+                    #淡入時間
+                    Fade-In: 0
+                    #停留時間
+                    Stay: 0.4
+                    #淡出時間
+                    Fade-Out: 0
+                    #主標題
+                    Title: '&a&l這裡是公告的標題信息~'
+                    #子標題
+                    Sub-Title: '&e&l這裡是公告的子標題~'
+                'example_2':
+                    Delay: 0.3
+                    Fade-In: 0
+                    Stay: 0.4
+                    Fade-Out: 0
+                    Title: '&b&l這裡是公告的標題信息~'
+                    Sub-Title: '&f&l這裡是公告的子標題~'
+            #任務順序
+            Task-Sequence:
+            - 'example_1'
+            - 'example_2'
+            - 'example_1'
+            - 'example_2'
+            - 'example_1'
+            - 'example_2'
+        #動作欄消息
+        ActionBars: 
+            Enabled: false
+            #任務順序
+            Task-Sequence:
+            #本文消息列表（格式： [消息]:[延遲]）
+            - '&a&l這是動作欄消息的示範本文': 0.2
+            - '&e&l這&a&l是動作欄消息的示範本文': 0.2
+            - '&a&l這&e&l是&a&l動作欄消息的示範本文': 0.2
+            - '&a&l這是&e&l動&a&l作欄消息的示範本文': 0.2
+            - '&a&l這是動&e&l作&a&l欄消息的示範本文': 0.2
+            - '&a&l這是動作&e&l欄&a&l消息的示範本文': 0.2
+            - '&a&l這是動作欄&e&l消&a&l息的示範本文': 0.2
+            - '&a&l這是動作欄消&e&l息&a&l的示範本文': 0.2
+            - '&a&l這是動作欄消息&e&l的&a&l示範本文': 0.2
+            - '&a&l這是動作欄消息的&e&l示&a&l範本文': 0.2
+            - '&a&l這是動作欄消息的示&e&l範&a&l本文': 0.2
+            - '&a&l這是動作欄消息的示範&e&l本&a&l文': 0.2
+            - '&a&l這是動作欄消息的示範本&e&l文': 0.2
+            - '&a&l這是動作欄消息的示範本文': 0.2
+            - '&a&l這是動作欄消息的示範本&e&l文': 0.2
+            - '&a&l這是動作欄消息的示範&e&l本&a&l文': 0.2
+            - '&a&l這是動作欄消息的示&e&l範&a&l本文': 0.2
+            - '&a&l這是動作欄消息的&e&l示&a&l範本文': 0.2
+            - '&a&l這是動作欄消息&e&l的&a&l示範本文': 0.2
+            - '&a&l這是動作欄消&e&l息&a&l的示範本文': 0.2
+            - '&a&l這是動作欄&e&l消&a&l息的示範本文': 0.2
+            - '&a&l這是動作&e&l欄&a&l消息的示範本文': 0.2
+            - '&a&l這是動&e&l作&a&l欄消息的示範本文': 0.2
+            - '&a&l這是&e&l動&a&l作欄消息的示範本文': 0.2
+            - '&a&l這&e&l是&a&l動作欄消息的示範本文': 0.2
+            - '&e&l這&a&l是動作欄消息的示範本文': 0.2
+            - '&a&l這是動作欄消息的示範本文': 0.2
+            - '&r': 0.2

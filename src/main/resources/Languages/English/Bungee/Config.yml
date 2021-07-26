@@ -5,7 +5,24 @@ Prefix: '&aLite&eAnnouncer &f&l>>> '
 #Provide Chinese and English by default
 Language: English
 
+#Whether to display announcements in the console
+Console-Broadcast: true
+    
+#Whether enable Metrics
+#Detailed: bstats.org
+Metrics: true
+
+#Whether to check update
+#Only running at server starting. 
+#It will check the latest version of the plugin, and report to the console and authorized players.
+#This function will not cause the server to generate too much traffic. (Less than 1kb)
+Updater: true
+
 Permissions:
+    #About updater's permission
+    Updater: 
+        Permission: liteannouncer.updater
+        Default: false
     #Commands permission settings.
     Commands:
         Help: 
@@ -17,6 +34,9 @@ Permissions:
             Default: false
         View: 
             Permission: liteannouncer.command.view
+            Default: false
+        Broadcast: 
+            Permission: liteannouncer.command.broadcast
             Default: false
         List: 
             Permission: liteannouncer.command.list

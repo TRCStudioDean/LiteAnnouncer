@@ -83,6 +83,15 @@ public class Configuration
             return config.getBoolean(path);
         }
     }
+    
+    public List getList(String path) {
+        if (config.get(path) == null) {
+            repairConfigurationSection(path);
+            return config.getList(path);
+        } else {
+            return config.getList(path);
+        }
+    }
 
     public List<String> getStringList(String path) {
         if (config.get(path) == null) {

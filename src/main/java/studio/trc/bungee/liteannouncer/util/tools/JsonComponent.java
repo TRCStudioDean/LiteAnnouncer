@@ -1,32 +1,28 @@
 package studio.trc.bungee.liteannouncer.util.tools;
 
+import lombok.Getter;
+
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.HoverEvent;
 
 public class JsonComponent
 {
+    @Getter
     private final String placeholder;
-    private final BaseComponent bc;
+    @Getter
+    private final BaseComponent component;
     
-    public JsonComponent(String placeholder, BaseComponent bc) {
+    public JsonComponent(String placeholder, BaseComponent component) {
         this.placeholder = placeholder;
-        this.bc = bc;
-    }
-    
-    public String getPlaceholder() {
-        return placeholder;
-    }
-    
-    public BaseComponent getComponent() {
-        return bc;
+        this.component = component;
     }
     
     public ClickEvent getClickEvent() {
-        return bc.getClickEvent();
+        return component.getClickEvent();
     }
     
     public HoverEvent getHoverEvent() {
-        return bc.getHoverEvent();
+        return component.getHoverEvent();
     }
 }

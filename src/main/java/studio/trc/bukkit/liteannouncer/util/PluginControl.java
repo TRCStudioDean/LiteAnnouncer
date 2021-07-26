@@ -2,6 +2,7 @@ package studio.trc.bukkit.liteannouncer.util;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -22,15 +23,22 @@ import studio.trc.bukkit.liteannouncer.async.AnnouncerThread;
 import studio.trc.bukkit.liteannouncer.configuration.Configuration;
 import studio.trc.bukkit.liteannouncer.configuration.ConfigurationType;
 import studio.trc.bukkit.liteannouncer.configuration.ConfigurationUtil;
+import studio.trc.bukkit.liteannouncer.util.tools.ActionBarOfBroadcast;
+import studio.trc.bukkit.liteannouncer.util.tools.TitleOfBroadcast;
 
 public class PluginControl
 {
     private static AnnouncerThread thread = null;
     private static final List<Announcement> cacheAnnouncement = new ArrayList();
     private static final List<JsonComponent> cacheJsonComponent = new ArrayList();
+    private static final String nmsVersion = Bukkit.getServer().getClass().getPackage().getName().split("\\.")[3];
     
     public static String getPrefix() {
-        return ConfigurationUtil.getConfig(ConfigurationType.CONFIG).getString("Prefix").replace("&", "§");
+        return MessageUtil.toColor(ConfigurationUtil.getConfig(ConfigurationType.CONFIG).getString("Prefix"));
+    }
+    
+    public static String getNMSVersion() {
+        return nmsVersion;
     }
     
     public static boolean hasPermission(CommandSender sender, String path) {
@@ -38,8 +46,20 @@ public class PluginControl
         return sender.hasPermission(ConfigurationUtil.getConfig(ConfigurationType.CONFIG).getString(path + ".Permission"));
     }
     
+    public static boolean enabledConsoleBroadcast() {
+        return ConfigurationUtil.getConfig(ConfigurationType.CONFIG).getBoolean("Console-Broadcast");
+    }
+    
     public static boolean usePlaceholderAPI() {
         return ConfigurationUtil.getConfig(ConfigurationType.CONFIG).getBoolean("Use-PlaceholderAPI");
+    }
+    
+    public static boolean enableUpdater() {
+        return ConfigurationUtil.getConfig(ConfigurationType.CONFIG).getBoolean("Updater");
+    }
+    
+    public static boolean enableMetrics() {
+        return ConfigurationUtil.getConfig(ConfigurationType.CONFIG).getBoolean("Metrics");
     }
     
     public static void reload() {
@@ -47,15 +67,17 @@ public class PluginControl
         
         if (usePlaceholderAPI()) {
             if (Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")) {
-                LiteAnnouncerProperties.sendOperationMessage("FindThePlaceholderAPI", true);
+                LiteAnnouncerProperties.sendOperationMessage("FindThePlaceholderAPI", new HashMap());
             } else {
                 ConfigurationUtil.getConfig(ConfigurationType.CONFIG).set("Use-PlaceholderAPI", false);
-                LiteAnnouncerProperties.sendOperationMessage("PlaceholderAPINotFound", true);
+                LiteAnnouncerProperties.sendOperationMessage("PlaceholderAPINotFound", new HashMap());
             }
         }
         
         reloadAnnouncements();
         reloadJsonComponents();
+        ActionBarUtil.initialize();
+        TitleUtil.initialize();
         
         restartAnnouncer();
     }
@@ -66,16 +88,16 @@ public class PluginControl
             public void run() {
                 if (thread != null && thread.isAlive()) {
                     thread.isRunning = false;
-                    LiteAnnouncerProperties.sendOperationMessage("AnnouncerWorkEnds", true);
+                    LiteAnnouncerProperties.sendOperationMessage("AnnouncerWorkEnds", new HashMap());
                     thread = new AnnouncerThread();
                     thread.start();
                     thread.isRunning = true;
-                    LiteAnnouncerProperties.sendOperationMessage("AnnouncerWorkBegins", true);
+                    LiteAnnouncerProperties.sendOperationMessage("AnnouncerWorkBegins", new HashMap());
                 } else {
                     thread = new AnnouncerThread();
                     thread.isRunning = true;
                     thread.start();
-                    LiteAnnouncerProperties.sendOperationMessage("AnnouncerWorkBegins", true);
+                    LiteAnnouncerProperties.sendOperationMessage("AnnouncerWorkBegins", new HashMap());
                 }
             }
         }.runTask(Main.getInstance());
@@ -84,7 +106,7 @@ public class PluginControl
     public static void stopAnnouncer() {
         if (thread != null && thread.isAlive()) {
             thread.isRunning = false;
-            LiteAnnouncerProperties.sendOperationMessage("AnnouncerWorkEnds", true);
+            LiteAnnouncerProperties.sendOperationMessage("AnnouncerWorkEnds", new HashMap());
         }
     }
     
@@ -98,6 +120,55 @@ public class PluginControl
                 double delay = config.getDouble("Announcements." + path + ".Delay");
                 List<String> messages = config.getStringList("Announcements." + path + ".Messages");
                 Announcement announcement = new Announcement(name, delay, messages, permission);
+                if (config.get("Announcements." + path + ".Titles.Task-Sequence") != null && config.getBoolean("Announcements." + path + ".Titles.Enabled")) {
+                    Map<String, TitleOfBroadcast> titles = new HashMap();
+                    for (String section : config.getConfigurationSection("Announcements." + path + ".Titles.Titles-Setting").getKeys(false)) {
+                        try {
+                            double fadein = config.getDouble("Announcements." + path + ".Titles.Titles-Setting." + section + ".Fade-In");
+                            double stay = config.getDouble("Announcements." + path + ".Titles.Titles-Setting." + section + ".Stay");
+                            double fadeout = config.getDouble("Announcements." + path + ".Titles.Titles-Setting." + section + ".Fade-Out");
+                            double titleDelay = config.getDouble("Announcements." + path + ".Titles.Titles-Setting." + section + ".Delay");
+                            String title = config.getString("Announcements." + path + ".Titles.Titles-Setting." + section + ".Title");
+                            String subTitle = config.getString("Announcements." + path + ".Titles.Titles-Setting." + section + ".Sub-Title");
+                            titles.put(section, new TitleOfBroadcast(fadein, stay, fadeout, titleDelay, title, subTitle));
+                        } catch (Exception ex) {
+                            Map<String, String> placeholders = new HashMap();
+                            placeholders.put("{exception}", ex.getLocalizedMessage() != null ? ex.getLocalizedMessage() : "null");
+                            placeholders.put("{title}", section);
+                            LiteAnnouncerProperties.sendOperationMessage("LoadingTitleFailed", placeholders);
+                            ex.printStackTrace();
+                        }
+                    }
+                    List<TitleOfBroadcast> sequence = new LinkedList();
+                    for (String title : config.getStringList("Announcements." + path + ".Titles.Task-Sequence")) {
+                        if  (titles.get(title) != null) {
+                            sequence.add(titles.get(title));
+                        }
+                    }
+                    announcement.setTitlesOfBroadcast(sequence);
+                }
+                if (config.get("Announcements." + path + ".ActionBars.Task-Sequence") != null && config.getBoolean("Announcements." + path + ".ActionBars.Enabled")) {
+                    List<ActionBarOfBroadcast> actionbars = new LinkedList();
+                    for (Map<String, Object> maps : (List<Map<String, Object>>) config.getList("Announcements." + path + ".ActionBars.Task-Sequence")) {
+                        try {
+                            double actionbarDelay = 0;
+                            String actionbar = null;
+                            for (String string : maps.keySet()) {
+                                actionbarDelay = Double.valueOf(maps.get(string).toString());
+                                actionbar = string;
+                                break;
+                            }
+                            actionbars.add(new ActionBarOfBroadcast(actionbar, actionbarDelay));
+                        } catch (Exception ex) {
+                            Map<String, String> placeholders = new HashMap();
+                            placeholders.put("{exception}", ex.getLocalizedMessage() != null ? ex.getLocalizedMessage() : "null");
+                            placeholders.put("{actionbar}", path);
+                            LiteAnnouncerProperties.sendOperationMessage("LoadingActionbarFailed", placeholders);
+                            ex.printStackTrace();
+                        }
+                    }
+                    announcement.setActionBarsOfBroadcast(actionbars);
+                }
                 cacheAnnouncement.add(announcement);
             } catch (Exception ex) {
                 Map<String, String> placeholders = new HashMap();

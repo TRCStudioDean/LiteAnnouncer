@@ -2,15 +2,19 @@ package studio.trc.bukkit.liteannouncer;
 
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import studio.trc.bukkit.liteannouncer.command.LiteAnnouncerCommand;
 import studio.trc.bukkit.liteannouncer.util.LiteAnnouncerProperties;
 import studio.trc.bukkit.liteannouncer.util.PluginControl;
+import studio.trc.bukkit.liteannouncer.util.Metrics;
+import studio.trc.bukkit.liteannouncer.util.Updater;
 
 public class Main
     extends JavaPlugin
 {
     private static Main main;
+    private static Metrics metrics;
     
     @Override
     public void onEnable() {
@@ -24,12 +28,29 @@ public class Main
             return;
         }
         
-        Bukkit.getPluginCommand("la").setExecutor(new LiteAnnouncerCommand());
-        Bukkit.getPluginCommand("liteannouncer").setExecutor(new LiteAnnouncerCommand());
-        Bukkit.getPluginCommand("la").setTabCompleter(new LiteAnnouncerCommand());
-        Bukkit.getPluginCommand("liteannouncer").setTabCompleter(new LiteAnnouncerCommand());
+        LiteAnnouncerCommand commandExecutor = new LiteAnnouncerCommand();
+        Bukkit.getPluginCommand("la").setExecutor(commandExecutor);
+        Bukkit.getPluginCommand("liteannouncer").setExecutor(commandExecutor);
+        Bukkit.getPluginCommand("la").setTabCompleter(commandExecutor);
+        Bukkit.getPluginCommand("liteannouncer").setTabCompleter(commandExecutor);
+        Bukkit.getPluginManager().registerEvents(new Updater(), this);
         
         PluginControl.reload();
+        
+        //It will run after the server is started.
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                if (PluginControl.enableUpdater()) {
+                    Updater.checkUpdate();
+                }
+            }
+        }.runTask(this);
+        
+        //Metrics
+        if (PluginControl.enableMetrics()) {
+            metrics = new Metrics(main, 12151);
+        }
     }
 
     @Override
@@ -39,5 +60,9 @@ public class Main
     
     public static Main getInstance() {
         return main;
+    }
+    
+    public static Metrics getMetrics() {
+        return metrics;
     }
 }

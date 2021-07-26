@@ -4,13 +4,12 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map;
 
 import net.md_5.bungee.config.Configuration;
 
 import studio.trc.bungee.liteannouncer.Main;
-import studio.trc.bungee.liteannouncer.util.LiteAnnouncerProperties;
+import studio.trc.bungee.liteannouncer.util.MessageUtil;
 
 public class DefaultConfigurationFile
 {
@@ -26,13 +25,9 @@ public class DefaultConfigurationFile
     }
     
     public static void loadDefaultConfigurationFile(ConfigurationType type) {
-        Locale lang = LiteAnnouncerProperties.lang;
-        String jarPath = "English";
-        if (lang.equals(Locale.SIMPLIFIED_CHINESE) || lang.equals(Locale.CHINESE)) {
-            jarPath = "Chinese";
-        }
+        String jarPath = MessageUtil.Language.getLocaleLanguage().getFolderName();
         String fileName = type.getFileName();
-        try (Reader config = new InputStreamReader(Main.getInstance().getClass().getResource("/Languages/" + jarPath + "/" + fileName).openStream(), "UTF-8")) {
+        try (Reader config = new InputStreamReader(Main.getInstance().getClass().getResource("/Languages/" + jarPath + "/Bungee/" + fileName).openStream(), "UTF-8")) {
             Configuration configFile = ConfigurationUtil.provider.load(config, ConfigurationUtil.getFileConfiguration(type));
             cacheDefaultConfig.put(type, configFile);
         } catch (IOException ex) {

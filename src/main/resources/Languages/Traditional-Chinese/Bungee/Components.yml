@@ -1,0 +1,34 @@
+#Json信息元素編輯
+#本功能可用於自定義Json消息塊並使其能夠被添加到公告中
+#每一個Json信息元素的功能均可自定義
+#例如點擊所使用的命令、鼠標懸停時的消息、打開網站等功能
+Json-Components:
+    example:
+        #佔位符&變量名稱
+        Placeholder: '%example_json_component%'
+        #本文信息
+        Text: '&a[Json信息示範]'
+        #點擊事件
+        ClickEvent:
+            #點擊的作用
+            #可用的設置有: OPEN_URL, OPEN_FILE, RUN_COMMAND, SUGGEST_COMMAND, CHANGE_PAGE, COPY_TO_CLIPBOARD
+            # OPEN_URL: 點擊打開一個URL鏈接（例如: https://www.trc.studio/ 打開伺服器的官方網站）
+            # OPEN_FILE: 點擊打開一個本地目錄的文件
+            # RUN_COMMAND: 點擊執行命令
+            # SUGGEST_COMMAND: 點擊將命令填充到客戶端的消息欄中
+            # CHANGE_PAGE: 點擊切換書本的頁面
+            # COPY_TO_CLIPBOARD: 點擊將指定文字複製到剪貼板
+            Action: RUN_COMMAND
+            #點擊事件的目標值
+            Value: '/say hello!'
+        HoverEvent:
+            #懸浮事件的作用
+            #可用的設置有: SHOW_TEXT, SHOW_ACHIEVEMENT, SHOW_ITEM, SHOW_ENTITY
+            # SHOW_TEXT: 顯示普通的文字
+            # SHOW_ACHIEVEMENT: 顯示成就格式的文字
+            # SHOW_ITEM: 顯示一個物品的NBT信息
+            # SHOW_ENTITY: 顯示一個實體的NBT信息
+            Action: SHOW_TEXT
+            #當鼠標移動至該文字上方時所顯示的文字內容
+            Hover-Values:
+            - '&6這是默認的鼠標懸浮消息哦~'

@@ -8,7 +8,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -19,6 +18,7 @@ import org.bukkit.configuration.file.YamlConfiguration;
 
 import studio.trc.bukkit.liteannouncer.Main;
 import studio.trc.bukkit.liteannouncer.util.LiteAnnouncerProperties;
+import studio.trc.bukkit.liteannouncer.util.MessageUtil;
 
 public class ConfigurationUtil
 {
@@ -85,7 +85,7 @@ public class ConfigurationUtil
             saveResource(fileType);
             try (InputStreamReader newConfig = new InputStreamReader(new FileInputStream(file), "UTF-8")) {
                 getFileConfiguration(fileType).load(newConfig);
-                LiteAnnouncerProperties.sendOperationMessage("ConfigurationRepair", true);
+                LiteAnnouncerProperties.sendOperationMessage("ConfigurationRepair", new HashMap());
             } catch (IOException | InvalidConfigurationException ex1) {
                 ex1.printStackTrace();
             }
@@ -99,7 +99,6 @@ public class ConfigurationUtil
     }
 
     private static void saveResource(ConfigurationType file) {
-        String lang = Locale.getDefault().toString();
         if (!new File("plugins/LiteAnnouncer").exists()) {
             new File("plugins/LiteAnnouncer").mkdir();
         }
@@ -109,21 +108,11 @@ public class ConfigurationUtil
                     File configFile = new File("plugins/LiteAnnouncer/Config.yml");
                     if (!configFile.exists()) {
                         configFile.createNewFile();
-                        if (lang.equalsIgnoreCase("zh_cn")) {
-                            InputStream is = Main.class.getResourceAsStream("/Languages/Chinese/Bukkit/Config.yml");
-                            try (OutputStream out = new FileOutputStream(configFile)) {
-                                int b;
-                                while ((b = is.read()) != -1) {
-                                    out.write((char) b);
-                                }
-                            }
-                        } else {
-                            InputStream is = Main.class.getResourceAsStream("/Languages/English/Bukkit/Config.yml");
-                            try (OutputStream out = new FileOutputStream(configFile)) {
-                                int b;
-                                while ((b = is.read()) != -1) {
-                                    out.write((char) b);
-                                }
+                        InputStream is = Main.class.getResourceAsStream("/Languages/" + MessageUtil.Language.getLocaleLanguage().getFolderName() + "/Bukkit/Config.yml");
+                        try (OutputStream out = new FileOutputStream(configFile)) {
+                            int b;
+                            while ((b = is.read()) != -1) {
+                                out.write((char) b);
                             }
                         }
                     }
@@ -135,21 +124,11 @@ public class ConfigurationUtil
                     File configFile = new File("plugins/LiteAnnouncer/Announcements.yml");
                     if (!configFile.exists()) {
                         configFile.createNewFile();
-                        if (lang.equalsIgnoreCase("zh_cn")) {
-                            InputStream is = Main.class.getResourceAsStream("/Languages/Chinese/Bukkit/Announcements.yml");
-                            try (OutputStream out = new FileOutputStream(configFile)) {
-                                int b;
-                                while ((b = is.read()) != -1) {
-                                    out.write((char) b);
-                                }
-                            }
-                        } else {
-                            InputStream is = Main.class.getResourceAsStream("/Languages/English/Bukkit/Announcements.yml");
-                            try (OutputStream out = new FileOutputStream(configFile)) {
-                                int b;
-                                while ((b = is.read()) != -1) {
-                                    out.write((char) b);
-                                }
+                        InputStream is = Main.class.getResourceAsStream("/Languages/" + MessageUtil.Language.getLocaleLanguage().getFolderName() + "/Bukkit/Announcements.yml");
+                        try (OutputStream out = new FileOutputStream(configFile)) {
+                            int b;
+                            while ((b = is.read()) != -1) {
+                                out.write((char) b);
                             }
                         }
                     }
@@ -161,21 +140,11 @@ public class ConfigurationUtil
                     File configFile = new File("plugins/LiteAnnouncer/Components.yml");
                     if (!configFile.exists()) {
                         configFile.createNewFile();
-                        if (lang.equalsIgnoreCase("zh_cn")) {
-                            InputStream is = Main.class.getResourceAsStream("/Languages/Chinese/Bukkit/Components.yml");
-                            try (OutputStream out = new FileOutputStream(configFile)) {
-                                int b;
-                                while ((b = is.read()) != -1) {
-                                    out.write((char) b);
-                                }
-                            }
-                        } else {
-                            InputStream is = Main.class.getResourceAsStream("/Languages/English/Bukkit/Components.yml");
-                            try (OutputStream out = new FileOutputStream(configFile)) {
-                                int b;
-                                while ((b = is.read()) != -1) {
-                                    out.write((char) b);
-                                }
+                        InputStream is = Main.class.getResourceAsStream("/Languages/" + MessageUtil.Language.getLocaleLanguage().getFolderName() + "/Bukkit/Components.yml");
+                        try (OutputStream out = new FileOutputStream(configFile)) {
+                            int b;
+                            while ((b = is.read()) != -1) {
+                                out.write((char) b);
                             }
                         }
                     }
@@ -187,21 +156,11 @@ public class ConfigurationUtil
                     File configFile = new File("plugins/LiteAnnouncer/Messages.yml");
                     if (!configFile.exists()) {
                         configFile.createNewFile();
-                        if (lang.equalsIgnoreCase("zh_cn")) {
-                            InputStream is = Main.class.getResourceAsStream("/Languages/Chinese/Bukkit/Messages.yml");
-                            try (OutputStream out = new FileOutputStream(configFile)) {
-                                int b;
-                                while ((b = is.read()) != -1) {
-                                    out.write((char) b);
-                                }
-                            }
-                        } else {
-                            InputStream is = Main.class.getResourceAsStream("/Languages/English/Bukkit/Messages.yml");
-                            try (OutputStream out = new FileOutputStream(configFile)) {
-                                int b;
-                                while ((b = is.read()) != -1) {
-                                    out.write((char) b);
-                                }
+                        InputStream is = Main.class.getResourceAsStream("/Languages/" + MessageUtil.Language.getLocaleLanguage().getFolderName() + "/Bukkit/Messages.yml");
+                        try (OutputStream out = new FileOutputStream(configFile)) {
+                            int b;
+                            while ((b = is.read()) != -1) {
+                                out.write((char) b);
                             }
                         }
                     }

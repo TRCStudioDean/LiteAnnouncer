@@ -1,0 +1,44 @@
+#命令前綴
+Prefix: '&aLite&eAnnouncer &f&l>>> '
+
+#插件語言設置（默認提供簡/繁體中文與英文的語言文件）
+Language: Traditiona-Chinese
+
+#是否使用PlaceholderAPI
+Use-PlaceholderAPI: true
+
+#是否在控制台中顯示公告
+Console-Broadcast: true
+
+#是否檢查更新
+#僅在啟動伺服器時運行，將自動檢測插件的最新版本及信息，並彙報給控制台及有擁有對應權限的玩家
+#此功能並不會造成伺服器產生過多流量（每次檢測產生約不到1kb網路流量）
+Updater: true
+    
+#是否啟用Metrics
+#詳見bStats.org
+Metrics: true
+
+Permissions:
+    #插件更新檢測相關權限
+    Updater:
+        Permission: liteannouncer.updater
+        Default: false
+    #命令相關權限
+    Commands:
+        Help:
+            Permission: liteannouncer.command.help
+            #是否默認擁有權限
+            Default: true
+        Reload: 
+            Permission: liteannouncer.command.reload
+            Default: false
+        View: 
+            Permission: liteannouncer.command.view
+            Default: false
+        Broadcast: 
+            Permission: liteannouncer.command.broadcast
+            Default: false
+        List: 
+            Permission: liteannouncer.command.list
+            Default: false

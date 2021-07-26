@@ -1,0 +1,95 @@
+Simplified-Chinese:
+    No-Permission: '{prefix}&c你没有这么做的权限!'
+    Repaired-Config-Section: '{prefix}&c插件无法获取配置文件 &e{config} &c路径 &7{path}&c, 已通过获取默认配置文件进行修复.'
+    Command-Messages:
+        Unknown-Command: '{prefix}&c未知命令, 使用&6/la help &c查看帮助'
+        Help-Command: 
+        - '{prefix}&a使用帮助 &f&l>>>'
+        - ' &6/la help &c查看帮助'
+        - ' &6/la reload &c重载配置文件'
+        - ' &6/la view [公告名称] &c查看一个公告的内容'
+        - ' &6/la broadcast [公告名称] &c广播此公告'
+        - ' &6/la list &c列出所有已启用的公告'
+        Reload: '{prefix}&a已重载配置文件.'
+        View:
+            Help: '{prefix}&c使用帮助: /la view [公告名称]'
+            Not-Found: '{prefix}&c找不到公告: &e{announcement} &c， 请使用 &a/la list &c列出所有可用的公告！'
+        Broadcast:
+            Help: '{prefix}&c使用帮助: /la broadcast [公告名称]'
+            Not-Found: '{prefix}&c找不到公告: &e{announcement} &c， 请使用 &a/la list &c列出所有可用的公告！'
+        List: '{prefix}&a当前可用的公告如下: &c{list}'
+    Updater:
+        Link:
+            Message: '&d&l[点击查看]'
+            Hover-Text:
+            - '&5点击获取下载链接'
+        Checked: 
+        - '{prefix}&a发现插件存在最新版本: &bv{version}'
+        - '&6- &3服务器运行版本: &6v{nowVersion}'
+        - '&6- &3下载地址: &d%link%'
+        - '&6- &3更新日志: {description}'
+        Error: '{prefix}&c无法获取插件最新版本, 请检查你的网络是否正常! '
+
+Traditional-Chinese:
+    No-Permission: '{prefix}&c你沒有這麼做的權限!'
+    Repaired-Config-Section: '{prefix}&c插件無法獲取配置文件 &e{config} &c路徑 &7{path}&c, 已通過獲取默認配置文件進行修復.'
+    Command-Messages:
+        Unknown-Command: '{prefix}&c未知命令, 使用&6/la help &c查看幫助'
+        Help-Command:
+        - '{prefix}&a使用幫助 &f&l>>>'
+        - ' &6/la help &c查看幫助'
+        - ' &6/la reload &c重載配置文件'
+        - ' &6/la view [公告名稱] &c查看一個公告的內容'
+        - ' &6/la broadcast [公告名稱] &c廣播此公告'
+        - ' &6/la list &c列出所有已啟用的公告'
+        Reload: '{prefix}&a已重載配置文件.'
+        View:
+            Help: '{prefix}&c使用幫助: /la view [公告名稱]'
+            Not-Found: '{prefix}&c找不到公告: &e{announcement} &c， 請使用 &a/la list &c列出所有可用的公告！ '
+        Broadcast:
+            Help: '{prefix}&c使用幫助: /la broadcast [公告名稱]'
+            Not-Found: '{prefix}&c找不到公告: &e{announcement} &c， 請使用 &a/la list &c列出所有可用的公告！ '
+        List: '{prefix}&a當前可用的公告如下: &c{list}'
+    Updater:
+        Link:
+            Message: '&d&l[點擊查看]'
+            Hover-Text:
+            - '&5點擊獲取下載鏈接'
+        Checked:
+        - '{prefix}&a發現插件存在最新版本: &bv{version}'
+        - '&6- &3伺服器運行版本: &6v{nowVersion}'
+        - '&6- &3下載地址: &d%link%'
+        - '&6- &3更新日誌: {description}'
+        Error: '{prefix}&c無法獲取插件最新版本, 請檢查你的網路是否正常! '
+        
+English:
+    No-Permission: '{prefix}&cYou don''t have permission to do this!'
+    Repaired-Config-Section: '{prefix}&cPlugin cannot obtain the configuration file &e{config} &c path &7{path}&c, which has been fixed by obtaining the default configuration file.'
+    Command-Messages:
+        Unknown-Command: '{prefix}&cUnknown command, Please use &6/signin help &cto view command list.'
+        Help-Command: 
+        - '{prefix}&aUsage help &f&l>>>'
+        - ' &6/la help &cView command help.'
+        - ' &6/la reload &cReload configuration files.'
+        - ' &6/la view [Announcement] &cView the announcement content.'
+        - ' &6/la broadcast [Announcement] &cBroadcast this announcement.'
+        - ' &6/la list &cList all announcements.'
+        Reload: '{prefix}&aConfiguration files has been reloaded.'
+        View:
+            Help: '{prefix}&cUsage help: /la view [Announcement]'
+            Not-Found: '{prefix}&cUnknown announcement name: &e{announcement} &c, Please use &a/la list &cto list all announcements.'
+        Broadcast:
+            Help: '{prefix}&cUsage help: /la broadcast [Announcement]'
+            Not-Found: '{prefix}&cUnknown announcement name: &e{announcement} &c, Please use &a/la list &cto list all announcements.'
+        List: '{prefix}&aThe currently available announcements are as follows: &c{list}'
+    Updater:
+        Link:
+            Message: '&d&l[ClickHere]'
+            Hover-Text:
+            - '&5Click to get the downloads link.'
+        Checked: 
+        - '{prefix}&aA new version has been released: &bv{version}'
+        - '&6- &3Now version: &6v{nowVersion}'
+        - '&6- &3Download link: &d%link%'
+        - '&6- &3Update log: {description}'
+        Error: '{prefix}&cUnable to check new version, please check whether network is normal!'

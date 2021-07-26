@@ -8,7 +8,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -19,6 +18,7 @@ import net.md_5.bungee.config.YamlConfiguration;
 
 import studio.trc.bungee.liteannouncer.Main;
 import studio.trc.bungee.liteannouncer.util.LiteAnnouncerProperties;
+import studio.trc.bungee.liteannouncer.util.MessageUtil;
 
 public class ConfigurationUtil
 {
@@ -104,7 +104,7 @@ public class ConfigurationUtil
             saveResource(fileType);
             try (InputStreamReader newConfig = new InputStreamReader(new FileInputStream(file), "UTF-8")) {
                 provider.load(newConfig, getFileConfiguration(fileType));
-                LiteAnnouncerProperties.sendOperationMessage("ConfigurationRepair", true);
+                LiteAnnouncerProperties.sendOperationMessage("ConfigurationRepair", new HashMap());
             } catch (IOException ex1) {
                 ex1.printStackTrace();
             }
@@ -118,7 +118,6 @@ public class ConfigurationUtil
     }
 
     private static void saveResource(ConfigurationType file) {
-        String lang = Locale.getDefault().toString();
         if (!new File("plugins/LiteAnnouncer").exists()) {
             new File("plugins/LiteAnnouncer").mkdir();
         }
@@ -128,21 +127,11 @@ public class ConfigurationUtil
                     File configFile = new File("plugins/LiteAnnouncer/Config.yml");
                     if (!configFile.exists()) {
                         configFile.createNewFile();
-                        if (lang.equalsIgnoreCase("zh_cn")) {
-                            InputStream is = Main.class.getResourceAsStream("/Languages/Chinese/Bungee/Config.yml");
-                            try (OutputStream out = new FileOutputStream(configFile)) {
-                                int b;
-                                while ((b = is.read()) != -1) {
-                                    out.write((char) b);
-                                }
-                            }
-                        } else {
-                            InputStream is = Main.class.getResourceAsStream("/Languages/English/Bungee/Config.yml");
-                            try (OutputStream out = new FileOutputStream(configFile)) {
-                                int b;
-                                while ((b = is.read()) != -1) {
-                                    out.write((char) b);
-                                }
+                        InputStream is = Main.class.getResourceAsStream("/Languages/" + MessageUtil.Language.getLocaleLanguage().getFolderName() + "/Bungee/Config.yml");
+                        try (OutputStream out = new FileOutputStream(configFile)) {
+                            int b;
+                            while ((b = is.read()) != -1) {
+                                out.write((char) b);
                             }
                         }
                     }
@@ -154,21 +143,11 @@ public class ConfigurationUtil
                     File configFile = new File("plugins/LiteAnnouncer/Announcements.yml");
                     if (!configFile.exists()) {
                         configFile.createNewFile();
-                        if (lang.equalsIgnoreCase("zh_cn")) {
-                            InputStream is = Main.class.getResourceAsStream("/Languages/Chinese/Bungee/Announcements.yml");
-                            try (OutputStream out = new FileOutputStream(configFile)) {
-                                int b;
-                                while ((b = is.read()) != -1) {
-                                    out.write((char) b);
-                                }
-                            }
-                        } else {
-                            InputStream is = Main.class.getResourceAsStream("/Languages/English/Bungee/Announcements.yml");
-                            try (OutputStream out = new FileOutputStream(configFile)) {
-                                int b;
-                                while ((b = is.read()) != -1) {
-                                    out.write((char) b);
-                                }
+                        InputStream is = Main.class.getResourceAsStream("/Languages/" + MessageUtil.Language.getLocaleLanguage().getFolderName() + "/Bungee/Announcements.yml");
+                        try (OutputStream out = new FileOutputStream(configFile)) {
+                            int b;
+                            while ((b = is.read()) != -1) {
+                                out.write((char) b);
                             }
                         }
                     }
@@ -180,21 +159,11 @@ public class ConfigurationUtil
                     File configFile = new File("plugins/LiteAnnouncer/Components.yml");
                     if (!configFile.exists()) {
                         configFile.createNewFile();
-                        if (lang.equalsIgnoreCase("zh_cn")) {
-                            InputStream is = Main.class.getResourceAsStream("/Languages/Chinese/Bungee/Components.yml");
-                            try (OutputStream out = new FileOutputStream(configFile)) {
-                                int b;
-                                while ((b = is.read()) != -1) {
-                                    out.write((char) b);
-                                }
-                            }
-                        } else {
-                            InputStream is = Main.class.getResourceAsStream("/Languages/English/Bungee/Components.yml");
-                            try (OutputStream out = new FileOutputStream(configFile)) {
-                                int b;
-                                while ((b = is.read()) != -1) {
-                                    out.write((char) b);
-                                }
+                        InputStream is = Main.class.getResourceAsStream("/Languages/" + MessageUtil.Language.getLocaleLanguage().getFolderName() + "/Bungee/Components.yml");
+                        try (OutputStream out = new FileOutputStream(configFile)) {
+                            int b;
+                            while ((b = is.read()) != -1) {
+                                out.write((char) b);
                             }
                         }
                     }
@@ -206,21 +175,11 @@ public class ConfigurationUtil
                     File configFile = new File("plugins/LiteAnnouncer/Messages.yml");
                     if (!configFile.exists()) {
                         configFile.createNewFile();
-                        if (lang.equalsIgnoreCase("zh_cn")) {
-                            InputStream is = Main.class.getResourceAsStream("/Languages/Chinese/Bungee/Messages.yml");
-                            try (OutputStream out = new FileOutputStream(configFile)) {
-                                int b;
-                                while ((b = is.read()) != -1) {
-                                    out.write((char) b);
-                                }
-                            }
-                        } else {
-                            InputStream is = Main.class.getResourceAsStream("/Languages/English/Bungee/Messages.yml");
-                            try (OutputStream out = new FileOutputStream(configFile)) {
-                                int b;
-                                while ((b = is.read()) != -1) {
-                                    out.write((char) b);
-                                }
+                        InputStream is = Main.class.getResourceAsStream("/Languages/" + MessageUtil.Language.getLocaleLanguage().getFolderName() + "/Bungee/Messages.yml");
+                        try (OutputStream out = new FileOutputStream(configFile)) {
+                            int b;
+                            while ((b = is.read()) != -1) {
+                                out.write((char) b);
                             }
                         }
                     }
