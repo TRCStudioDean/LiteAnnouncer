@@ -11,6 +11,9 @@ public class AnnouncerThread
     
     @Override
     public void run() {
+        if (PluginControl.getAnnouncements().isEmpty()) {
+            return;
+        }
         while (isRunning) {
             try {
                 new ArrayList<>(PluginControl.getAnnouncements()).stream().filter(running -> isRunning).forEach(announcement -> {

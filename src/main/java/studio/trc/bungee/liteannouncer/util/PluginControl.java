@@ -171,7 +171,7 @@ public class PluginControl
                     List<String> array = config.getStringList("Json-Components." + path + ".HoverEvent.Hover-Values");
                     for (String hover : array) {
                         end++;
-                        hoverText.add(new TextComponent(ChatColor.translateAlternateColorCodes('&', hover).replace("{prefix}", PluginControl.getPrefix())));
+                        hoverText.add(new TextComponent(MessageUtil.prefix(hover)));
                         if (end != array.size()) {
                             hoverText.add(new TextComponent("\n"));
                         }
@@ -179,7 +179,7 @@ public class PluginControl
                     he = new HoverEvent(HoverEvent.Action.valueOf(config.getString("Json-Components." + path + ".HoverEvent.Action").toUpperCase()), hoverText.toArray(new BaseComponent[0]));
                 }
                 
-                if (config.contains("Json-Components." + path + ".HoverEvent")) {
+                if (config.contains("Json-Components." + path + ".ClickEvent")) {
                     ce = new ClickEvent(ClickEvent.Action.valueOf(config.getString("Json-Components." + path + ".ClickEvent.Action").toUpperCase()), config.getString("Json-Components." + path + ".ClickEvent.Value"));
                 }
                 BaseComponent bc = new TextComponent(ChatColor.translateAlternateColorCodes('&', config.getString("Json-Components." + path + ".Text")).replace("{prefix}", PluginControl.getPrefix()));

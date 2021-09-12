@@ -116,7 +116,7 @@ public class LiteAnnouncerCommand
     private List<String> getAnnouncements(String args) {
         if (args != null) {
             List<String> names = new ArrayList();
-            PluginControl.getAnnouncements().stream().filter((announcement) -> (announcement.getName().toLowerCase().startsWith(args.toLowerCase()))).forEach((announcement) -> {
+            PluginControl.getAnnouncements().stream().filter(announcement -> announcement.getName().toLowerCase().startsWith(args.toLowerCase())).forEach(announcement -> {
                 names.add(announcement.getName());
             });
             return names;
@@ -128,11 +128,9 @@ public class LiteAnnouncerCommand
         List<String> commands = Arrays.asList("help", "reload", "broadcast",  "view", "list");
         if (args != null) {
             List<String> names = new ArrayList();
-            for (String command : commands) {
-                if (command.startsWith(args.toLowerCase())) {
-                    names.add(command);
-                }
-            }
+            commands.stream().filter(command -> command.startsWith(args.toLowerCase())).forEach(command -> {
+                names.add(command);
+            });
             return names;
         }
         return commands;
