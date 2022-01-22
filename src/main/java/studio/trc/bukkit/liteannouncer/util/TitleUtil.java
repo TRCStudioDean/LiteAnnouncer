@@ -1,15 +1,14 @@
 package studio.trc.bukkit.liteannouncer.util;
 
+import java.lang.reflect.Array;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
+import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import org.bukkit.entity.Player;
-import studio.trc.bukkit.liteannouncer.async.AnnouncerThread;
+
 import studio.trc.bukkit.liteannouncer.util.tools.TitleOfBroadcast;
 
 public class TitleUtil
@@ -36,7 +35,7 @@ public class TitleUtil
                 enumTitleAction = Class.forName("net.minecraft.server." + nmsVersion + ".PacketPlayOutTitle$EnumTitleAction");
                 enumPlayerInfoAction = Class.forName("net.minecraft.server." + nmsVersion + ".PacketPlayOutPlayerInfo$EnumPlayerInfoAction");
             }
-            if (nmsVersion.startsWith("v1_17")) {
+            if (nmsVersion.startsWith("v1_17") || nmsVersion.startsWith("v1_18")) {
                 chatComponentText = Class.forName("net.minecraft.network.chat.ChatComponentText");
                 interfaceChatBaseComponent = Class.forName("net.minecraft.network.chat.IChatBaseComponent");
                 packet = Class.forName("net.minecraft.network.protocol.Packet");
@@ -63,7 +62,7 @@ public class TitleUtil
         title = MessageUtil.toColor(MessageUtil.replacePlaceholders(player, title, new HashMap()));
         subTitle = MessageUtil.toColor(MessageUtil.replacePlaceholders(player, subTitle, new HashMap()));
         try {
-            if (nmsVersion.startsWith("v1_17")) {
+            if (nmsVersion.startsWith("v1_17") || nmsVersion.startsWith("v1_18")) {
                 Object animationPacket = clientboundSetTitlesAnimationPacket.getConstructor(int.class, int.class, int.class).newInstance((int) (fadein * 20), (int) (stay * 20), (int) (fadeout * 20));
                 sendPacket(player, animationPacket);
                 if (title != null) {
@@ -80,11 +79,11 @@ public class TitleUtil
                 Object animationPacket = packetPlayOutTitle.getConstructor(int.class, int.class, int.class).newInstance((int) (fadein * 20), (int) (stay * 20), (int) (fadeout * 20));
                 sendPacket(player, animationPacket);
                 if (title != null) {
-                    Object titleMessagePacket = packetPlayOutTitle.getConstructor(enumTitleAction, interfaceChatBaseComponent).newInstance(titleEnumPacket, craftChatMessage.getMethod("fromStringOrNull", String.class).invoke(null, title));
+                    Object titleMessagePacket = packetPlayOutTitle.getConstructor(enumTitleAction, interfaceChatBaseComponent).newInstance(titleEnumPacket, Array.get(craftChatMessage.getMethod("fromString", String.class).invoke(null, subTitle), 0));
                     sendPacket(player, titleMessagePacket);
                 }
                 if (subTitle != null) {
-                    Object subTitleMessagePacket = packetPlayOutTitle.getConstructor(enumTitleAction, interfaceChatBaseComponent).newInstance(subTitleEnumPacket, craftChatMessage.getMethod("fromStringOrNull", String.class).invoke(null, subTitle));
+                    Object subTitleMessagePacket = packetPlayOutTitle.getConstructor(enumTitleAction, interfaceChatBaseComponent).newInstance(subTitleEnumPacket, Array.get(craftChatMessage.getMethod("fromString", String.class).invoke(null, subTitle), 0));
                     sendPacket(player, subTitleMessagePacket);
                 }
             }
@@ -101,19 +100,23 @@ public class TitleUtil
         try {
             Object entityPlayer = craftPlayer.getMethod("getHandle").invoke(craftPlayer.cast(player));
             Object connection;
-            if (PluginControl.getNMSVersion().startsWith("v1_17")) {
-                List<String> fieldNames = new ArrayList();
-                Arrays.asList(entityPlayer.getClass().getFields()).stream().forEach(field -> {fieldNames.add(field.getName());});
-                if (fieldNames.contains("networkManager")) {
-                    connection = entityPlayer.getClass().getField("networkManager").get(entityPlayer);
-                } else {
-                    connection = entityPlayer.getClass().getField("connection").get(entityPlayer);
-                }
+            Field playerConnection = Arrays.stream(entityPlayer.getClass().getFields())
+                    .filter(field -> 
+                            field.getType().getSimpleName().equals("PlayerConnection"))
+                    .findFirst().orElse(null);
+            if (playerConnection != null) {
+                connection = playerConnection.get(entityPlayer);
             } else {
-                connection = entityPlayer.getClass().getField("playerConnection").get(entityPlayer);
+                return;
             }
-            connection.getClass().getMethod("sendPacket", packet).invoke(connection, packetObject);
-        } catch (NoSuchFieldException | SecurityException | NoSuchMethodException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
+            Method sendPacket = Arrays.stream(connection.getClass().getMethods())
+                    .filter(method -> 
+                            method.getParameterTypes().length == 1 && method.getParameterTypes()[0].getSimpleName().equals("Packet") && method.getReturnType().getSimpleName().equals("void"))
+                    .findFirst().orElse(null);
+            if (sendPacket != null) {
+                sendPacket.invoke(connection, packetObject);
+            }
+        } catch (SecurityException | NoSuchMethodException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
             ex.printStackTrace();
         }
     }

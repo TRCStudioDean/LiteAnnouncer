@@ -1,6 +1,8 @@
 package studio.trc.bukkit.liteannouncer.util;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -8,6 +10,7 @@ import java.util.List;
 import java.util.UUID;
 
 import org.bukkit.entity.Player;
+
 import studio.trc.bukkit.liteannouncer.util.tools.ActionBarOfBroadcast;
 
 public class ActionBarUtil
@@ -24,7 +27,7 @@ public class ActionBarUtil
     public static void initialize() {
         String nmsVersion = PluginControl.getNMSVersion();
         try {
-            if (nmsVersion.startsWith("v1_17")) {
+            if (nmsVersion.startsWith("v1_17") || nmsVersion.startsWith("v1_18")) {
                 chatMessageType = Class.forName("net.minecraft.network.chat.ChatMessageType");
                 chatComponentText = Class.forName("net.minecraft.network.chat.ChatComponentText");
                 interfaceChatBaseComponent = Class.forName("net.minecraft.network.chat.IChatBaseComponent");
@@ -86,19 +89,23 @@ public class ActionBarUtil
         try {
             Object entityPlayer = craftPlayer.getMethod("getHandle").invoke(craftPlayer.cast(player));
             Object connection;
-            if (PluginControl.getNMSVersion().startsWith("v1_17")) {
-                List<String> fieldNames = new ArrayList();
-                Arrays.asList(entityPlayer.getClass().getFields()).stream().forEach(field -> {fieldNames.add(field.getName());});
-                if (fieldNames.contains("networkManager")) {
-                    connection = entityPlayer.getClass().getField("networkManager").get(entityPlayer);
-                } else {
-                    connection = entityPlayer.getClass().getField("connection").get(entityPlayer);
-                }
+            Field playerConnection = Arrays.stream(entityPlayer.getClass().getFields())
+                    .filter(field -> 
+                            field.getType().getSimpleName().equals("PlayerConnection"))
+                    .findFirst().orElse(null);
+            if (playerConnection != null) {
+                connection = playerConnection.get(entityPlayer);
             } else {
-                connection = entityPlayer.getClass().getField("playerConnection").get(entityPlayer);
+                return;
             }
-            connection.getClass().getMethod("sendPacket", packet).invoke(connection, packetObject);
-        } catch (NoSuchFieldException | SecurityException | NoSuchMethodException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
+            Method sendPacket = Arrays.stream(connection.getClass().getMethods())
+                    .filter(method -> 
+                            method.getParameterTypes().length == 1 && method.getParameterTypes()[0].getSimpleName().equals("Packet") && method.getReturnType().getSimpleName().equals("void"))
+                    .findFirst().orElse(null);
+            if (sendPacket != null) {
+                sendPacket.invoke(connection, packetObject);
+            }
+        } catch (SecurityException | NoSuchMethodException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
             ex.printStackTrace();
         }
     }

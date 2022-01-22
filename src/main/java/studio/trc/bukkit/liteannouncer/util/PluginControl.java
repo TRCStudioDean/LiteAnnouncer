@@ -150,9 +150,9 @@ public class PluginControl
                 if (config.get("Announcements." + path + ".ActionBars.Task-Sequence") != null && config.getBoolean("Announcements." + path + ".ActionBars.Enabled")) {
                     List<ActionBarOfBroadcast> actionbars = new LinkedList();
                     for (Map<String, Object> maps : (List<Map<String, Object>>) config.getList("Announcements." + path + ".ActionBars.Task-Sequence")) {
+                        String actionbar = null;
                         try {
                             double actionbarDelay = 0;
-                            String actionbar = null;
                             for (String string : maps.keySet()) {
                                 actionbarDelay = Double.valueOf(maps.get(string).toString());
                                 actionbar = string;
@@ -162,7 +162,7 @@ public class PluginControl
                         } catch (Exception ex) {
                             Map<String, String> placeholders = new HashMap();
                             placeholders.put("{exception}", ex.getLocalizedMessage() != null ? ex.getLocalizedMessage() : "null");
-                            placeholders.put("{actionbar}", path);
+                            placeholders.put("{actionbar}", actionbar == null ? "null" : actionbar);
                             LiteAnnouncerProperties.sendOperationMessage("LoadingActionbarFailed", placeholders);
                             ex.printStackTrace();
                         }

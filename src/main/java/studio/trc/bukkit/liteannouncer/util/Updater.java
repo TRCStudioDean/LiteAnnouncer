@@ -46,7 +46,7 @@ public class Updater
         }
         if (Updater.isFoundANewVersion() && PluginControl.enableUpdater()) {
             if (PluginControl.hasPermission(player, "Permissions.Updater")) {
-                String nowVersion = Bukkit.getPluginManager().getPlugin("LiteSignIn").getDescription().getVersion();
+                String nowVersion = Bukkit.getPluginManager().getPlugin("LiteAnnouncer").getDescription().getVersion();
                 MessageUtil.getMessageList("Updater.Checked").stream().forEach(text -> {
                     if (text.toLowerCase().contains("%link%")) {
                         BaseComponent click = new TextComponent(MessageUtil.getMessage("Updater.Link.Message"));

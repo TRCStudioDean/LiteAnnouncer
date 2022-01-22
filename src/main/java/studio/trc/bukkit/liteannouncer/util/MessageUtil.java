@@ -238,7 +238,7 @@ public class MessageUtil
     }
     
     public static String toPlaceholderAPIResult(String text, CommandSender sender) {
-        return PluginControl.usePlaceholderAPI() && sender instanceof Player ? PlaceholderAPI.setPlaceholders((Player) sender, text) : text;
+        return PluginControl.usePlaceholderAPI() && sender instanceof Player ? toColor(PlaceholderAPI.setPlaceholders((Player) sender, text)) : toColor(text);
     }
     
     public static String getMessage(String path) {
