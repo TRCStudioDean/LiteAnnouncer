@@ -23,6 +23,8 @@ import studio.trc.bungee.liteannouncer.util.PluginControl;
 public class Announcement
 {
     @Getter
+    private final String configPath;
+    @Getter
     private final String name;
     @Getter
     private final String permission;
@@ -33,11 +35,12 @@ public class Announcement
     @Getter
     private final List<String> whitelist;
     @Getter
-    private final List<TitleOfBroadcast> titlesOfBroadcast = new LinkedList();
+    private final List<Title> titlesOfBroadcast = new LinkedList();
     @Getter
-    private final List<ActionBarOfBroadcast> actionBarsOfBroadcast = new LinkedList();
+    private final List<ActionBar> actionBarsOfBroadcast = new LinkedList();
     
-    public Announcement(String name, double delay, List<String> messages, String permission, List<String> whitelist) {
+    public Announcement(String configPath, String name, double delay, List<String> messages, String permission, List<String> whitelist) {
+        this.configPath = configPath;
         this.name = name;
         this.delay = delay;
         this.messages = messages;
@@ -45,12 +48,12 @@ public class Announcement
         this.whitelist = whitelist;
     }
     
-    public void setTitlesOfBroadcast(List<TitleOfBroadcast> titles) {
+    public void setTitlesOfBroadcast(List<Title> titles) {
         titlesOfBroadcast.clear();
         titlesOfBroadcast.addAll(titles);
     }
     
-    public void setActionBarsOfBroadcast(List<ActionBarOfBroadcast> actionbars) {
+    public void setActionBarsOfBroadcast(List<ActionBar> actionbars) {
         actionBarsOfBroadcast.clear();
         actionBarsOfBroadcast.addAll(actionbars);
     }
@@ -59,8 +62,8 @@ public class Announcement
         Map<String, BaseComponent> baseComponents = new HashMap();
         if (viewer instanceof ProxiedPlayer) {
             ProxiedPlayer player = (ProxiedPlayer) viewer;
-            for (String message : messages) {
-                for (JsonComponent jsonComponent : PluginControl.getJsonComponents()) {
+            messages.stream().forEach(message -> {
+                PluginControl.getJsonComponents().stream().forEach(jsonComponent -> {
                     BaseComponent bc = new TextComponent(MessageUtil.toLocallyPlaceholders(jsonComponent.getComponent().toPlainText(), player));
                     bc.setClickEvent(jsonComponent.getClickEvent());
                     bc.setHoverEvent(jsonComponent.getHoverEvent());
@@ -69,12 +72,12 @@ public class Announcement
                         hover[i] = new TextComponent(MessageUtil.toLocallyPlaceholders(hover[i].toPlainText(), player));
                     }
                     baseComponents.put(jsonComponent.getPlaceholder(), bc);
-                }
+                });
                 MessageUtil.sendJsonMessage(viewer, MessageUtil.toLocallyPlaceholders(message, player), baseComponents);
-            }
+            });
             if (!titlesOfBroadcast.isEmpty()) {
                 Thread thread = new Thread(() -> {
-                    for (TitleOfBroadcast title : titlesOfBroadcast) {
+                    titlesOfBroadcast.stream().map(title -> {
                         ProxyServer.getInstance().createTitle()
                                 .fadeIn((int) (title.getFadein() * 20))
                                 .stay((int) (title.getStay() * 20))
@@ -82,46 +85,49 @@ public class Announcement
                                 .title(new TextComponent(MessageUtil.toLocallyPlaceholders(title.getTitle(), player)))
                                 .subTitle(new TextComponent(MessageUtil.toLocallyPlaceholders(title.getSubTitle(), player)))
                                 .send(player);
+                        return title;
+                    }).forEach(title -> {
                         try {
                             Thread.sleep((long) (title.getDelay() * 1000));
                         } catch (InterruptedException ex) {
                             ex.printStackTrace();
                         }
-                    }
+                    });
                 }, "LiteAnnouncer-TitleThread");
                 thread.start();
             }
             if (!actionBarsOfBroadcast.isEmpty()) {
                 Thread thread = new Thread(() -> {
-                    for (ActionBarOfBroadcast actionbar : actionBarsOfBroadcast) {
+                    actionBarsOfBroadcast.stream().map(actionbar -> {
                         player.sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(MessageUtil.toLocallyPlaceholders(actionbar.getText(), player)));
+                        return actionbar;
+                    }).forEach((actionbar) -> {
                         try {
                             Thread.sleep((long) (actionbar.getDelay() * 1000));
                         } catch (InterruptedException ex) {
                             ex.printStackTrace();
                         }
-                    }
+                    });
                 }, "LiteAnnouncer-ActionBarThread");
                 thread.start();
             }
         } else {
-            for (String message : messages) {
-                for (JsonComponent jsonComponent : PluginControl.getJsonComponents()) {
+            messages.stream().forEach(message -> {
+                PluginControl.getJsonComponents().stream().forEach(jsonComponent -> {
                     baseComponents.put(jsonComponent.getPlaceholder(), jsonComponent.getComponent());
-                }
+                });
                 MessageUtil.sendJsonMessage(viewer, message, baseComponents);
-            }
+            });
         }
     }
     
     public void broadcast() {
         ProxyServer proxy = ProxyServer.getInstance();
         Map<String, BaseComponent> baseComponents = new HashMap();
-        for (String message : messages) {
-            for (ProxiedPlayer player : proxy.getPlayers()) {
-                if (!whitelist(player) || !(permission != null ? player.hasPermission(permission) : true)) continue;
+        messages.stream().map(message -> {
+            proxy.getPlayers().stream().filter(player -> !(!whitelist(player) || !(permission != null ? player.hasPermission(permission) : true))).map(player -> {
                 baseComponents.clear();
-                for (JsonComponent jsonComponent : PluginControl.getJsonComponents()) {
+                PluginControl.getJsonComponents().stream().forEach(jsonComponent -> {
                     BaseComponent bc = new TextComponent(MessageUtil.toLocallyPlaceholders(jsonComponent.getComponent().toPlainText(), player));
                     bc.setClickEvent(jsonComponent.getClickEvent());
                     bc.setHoverEvent(jsonComponent.getHoverEvent());
@@ -130,56 +136,60 @@ public class Announcement
                         hover[i] = new TextComponent(MessageUtil.toLocallyPlaceholders(hover[i].toPlainText(), player));
                     }
                     baseComponents.put(jsonComponent.getPlaceholder(), bc);
-                }
-                if (permission != null ? player.hasPermission(permission) : true) {
-                    MessageUtil.sendJsonMessage(player, MessageUtil.toLocallyPlaceholders(message, player), baseComponents);
-                }
-            }
-            if (!titlesOfBroadcast.isEmpty() && !proxy.getPlayers().isEmpty()) {
-                Thread thread = new Thread(() -> {
-                    for (TitleOfBroadcast title : titlesOfBroadcast) {
-                        for (ProxiedPlayer player : proxy.getPlayers()) {
-                            if (!whitelist(player) || !(permission != null ? player.hasPermission(permission) : true)) continue;
-                            proxy.createTitle()
-                                    .fadeIn((int) (title.getFadein() * 20))
-                                    .stay((int) (title.getStay() * 20))
-                                    .fadeOut((int) (title.getFadeout() * 20))
-                                    .title(new TextComponent(MessageUtil.toLocallyPlaceholders(title.getTitle(), player)))
-                                    .subTitle(new TextComponent(MessageUtil.toLocallyPlaceholders(title.getSubTitle(), player)))
-                                    .send(player);
-                        }
-                        try {
-                            Thread.sleep((long) (title.getDelay() * 1000));
-                        } catch (InterruptedException ex) {
-                            ex.printStackTrace();
-                        }
-                    }
-                }, "LiteAnnouncer-TitleThread");
-                thread.start();
-            }
-            if (!actionBarsOfBroadcast.isEmpty() && !proxy.getPlayers().isEmpty()) {
-                Thread thread = new Thread(() -> {
-                    for (ActionBarOfBroadcast actionbar : actionBarsOfBroadcast) {
-                        for (ProxiedPlayer player : proxy.getPlayers()) {
-                            if (!whitelist(player) || !(permission != null ? player.hasPermission(permission) : true)) continue;
-                            player.sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(MessageUtil.toLocallyPlaceholders(actionbar.getText(), player)));
-                        }
-                        try {
-                            Thread.sleep((long) (actionbar.getDelay() * 1000));
-                        } catch (InterruptedException ex) {
-                            ex.printStackTrace();
-                        }
-                    }
-                }, "LiteAnnouncer-ActionBarThread");
-                thread.start();
-            }
+                });
+                return player;
+            }).filter(player -> permission != null ? player.hasPermission(permission) : true).forEach(player -> {
+                MessageUtil.sendJsonMessage(player, MessageUtil.toLocallyPlaceholders(message, player), baseComponents);
+            });
+            return message;
+        }).forEach(message -> {
             if (PluginControl.enabledConsoleBroadcast()) {
                 baseComponents.clear();
-                for (JsonComponent jsonComponent : PluginControl.getJsonComponents()) {
+                PluginControl.getJsonComponents().stream().forEach(jsonComponent -> {
                     baseComponents.put(jsonComponent.getPlaceholder(), jsonComponent.getComponent());
-                }
+                });
                 MessageUtil.sendJsonMessage(proxy.getConsole(), message, baseComponents);
             }
+        });
+        if (!titlesOfBroadcast.isEmpty() && !proxy.getPlayers().isEmpty()) {
+            Thread thread = new Thread(() -> {
+                titlesOfBroadcast.stream().map(title -> {
+                    proxy.getPlayers().stream().filter(player -> !(!whitelist(player) || !(permission != null ? player.hasPermission(permission) : true))).forEach(player -> {
+                        proxy.createTitle()
+                                .fadeIn((int) (title.getFadein() * 20))
+                                .stay((int) (title.getStay() * 20))
+                                .fadeOut((int) (title.getFadeout() * 20))
+                                .title(new TextComponent(MessageUtil.toLocallyPlaceholders(title.getTitle(), player)))
+                                .subTitle(new TextComponent(MessageUtil.toLocallyPlaceholders(title.getSubTitle(), player)))
+                                .send(player);
+                    });
+                    return title;
+                }).forEach(title -> {
+                    try {
+                        Thread.sleep((long) (title.getDelay() * 1000));
+                    } catch (InterruptedException ex) {
+                        ex.printStackTrace();
+                    }
+                });
+            }, "LiteAnnouncer-TitleThread");
+            thread.start();
+        }
+        if (!actionBarsOfBroadcast.isEmpty() && !proxy.getPlayers().isEmpty()) {
+            Thread thread = new Thread(() -> {
+                actionBarsOfBroadcast.stream().map(actionbar -> {
+                    proxy.getPlayers().stream().filter(player -> !(!whitelist(player) || !(permission != null ? player.hasPermission(permission) : true))).forEach(player -> {
+                        player.sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(MessageUtil.toLocallyPlaceholders(actionbar.getText(), player)));
+                    });
+                    return actionbar;
+                }).forEach(actionbar -> {
+                    try {
+                        Thread.sleep((long) (actionbar.getDelay() * 1000));
+                    } catch (InterruptedException ex) {
+                        ex.printStackTrace();
+                    }
+                });
+            }, "LiteAnnouncer-ActionBarThread");
+            thread.start();
         }
     }
     

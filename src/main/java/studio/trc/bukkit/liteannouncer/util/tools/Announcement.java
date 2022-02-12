@@ -25,6 +25,8 @@ import studio.trc.bukkit.liteannouncer.util.TitleUtil;
 public class Announcement
 {
     @Getter
+    private final String configPath;
+    @Getter
     private final String name;
     @Getter
     private final String permission;
@@ -33,23 +35,24 @@ public class Announcement
     @Getter
     private final List<String> messages;
     @Getter
-    private final List<TitleOfBroadcast> titlesOfBroadcast = new LinkedList();
+    private final List<Title> titlesOfBroadcast = new LinkedList();
     @Getter
-    private final List<ActionBarOfBroadcast> actionBarsOfBroadcast = new LinkedList();
+    private final List<ActionBar> actionBarsOfBroadcast = new LinkedList();
     
-    public Announcement(String name, double delay, List<String> messages, String permission) {
+    public Announcement(String configPath, String name, double delay, List<String> messages, String permission) {
+        this.configPath = configPath;
         this.name = name;
         this.delay = delay;
         this.messages = messages;
         this.permission = permission;
     }
     
-    public void setTitlesOfBroadcast(List<TitleOfBroadcast> titles) {
+    public void setTitlesOfBroadcast(List<Title> titles) {
         titlesOfBroadcast.clear();
         titlesOfBroadcast.addAll(titles);
     }
     
-    public void setActionBarsOfBroadcast(List<ActionBarOfBroadcast> actionbars) {
+    public void setActionBarsOfBroadcast(List<ActionBar> actionbars) {
         actionBarsOfBroadcast.clear();
         actionBarsOfBroadcast.addAll(actionbars);
     }
@@ -57,8 +60,8 @@ public class Announcement
     public void view(CommandSender viewer) {
         Map<String, BaseComponent> baseComponents = new HashMap();
         if (viewer instanceof Player) {
-            for (String message : messages) {
-                for (JsonComponent jsonComponent : PluginControl.getJsonComponents()) {
+            messages.stream().forEach(message -> {
+                PluginControl.getJsonComponents().stream().forEach(jsonComponent -> {
                     BaseComponent bc = new TextComponent(MessageUtil.toPlaceholderAPIResult(jsonComponent.getComponent().toPlainText(), viewer));
                     bc.setClickEvent(jsonComponent.getClickEvent());
                     bc.setHoverEvent(jsonComponent.getHoverEvent());
@@ -67,52 +70,55 @@ public class Announcement
                         hover[i] = new TextComponent(MessageUtil.toPlaceholderAPIResult(hover[i].toPlainText(), viewer));
                     }
                     baseComponents.put(jsonComponent.getPlaceholder(), bc);
-                }
+                });
                 MessageUtil.sendJsonMessage(viewer, message, baseComponents);
-            }
+            });
             if (!titlesOfBroadcast.isEmpty()) {
                 Thread thread = new Thread(() -> {
-                    for (TitleOfBroadcast title : titlesOfBroadcast) {
+                    titlesOfBroadcast.stream().map(title -> {
                         TitleUtil.sendTitle((Player) viewer, title);
+                        return title;
+                    }).forEach(title -> {
                         try {
                             Thread.sleep((long) (title.getDelay() * 1000));
                         } catch (InterruptedException ex) {
                             ex.printStackTrace();
                         }
-                    }
+                    });
                 }, "LiteAnnouncer-TitleThread");
                 thread.start();
             }
             if (!actionBarsOfBroadcast.isEmpty()) {
                 Thread thread = new Thread(() -> {
-                    for (ActionBarOfBroadcast actionbar : actionBarsOfBroadcast) {
+                    actionBarsOfBroadcast.stream().map(actionbar -> {
                         ActionBarUtil.sendActionBar((Player) viewer, actionbar);
+                        return actionbar;
+                    }).forEach(actionbar -> {
                         try {
                             Thread.sleep((long) (actionbar.getDelay() * 1000));
                         } catch (InterruptedException ex) {
                             ex.printStackTrace();
                         }
-                    }
+                    });
                 }, "LiteAnnouncer-ActionBarThread");
                 thread.start();
             }
         } else {
-            for (String message : messages) {
-                for (JsonComponent jsonComponent : PluginControl.getJsonComponents()) {
+            messages.stream().forEach(message -> {
+                PluginControl.getJsonComponents().stream().forEach(jsonComponent -> {
                     baseComponents.put(jsonComponent.getPlaceholder(), jsonComponent.getComponent());
-                }
+                });
                 MessageUtil.sendJsonMessage(viewer, message, baseComponents);
-            }
+            });
         }
     }
     
     public void broadcast() {
-        for (String message : messages) {
+        messages.stream().forEach(message -> {
             Map<String, BaseComponent> baseComponents = new HashMap();
-            for (Player player : Bukkit.getOnlinePlayers()) {
-                if (!(permission != null ? player.hasPermission(permission) : true)) continue;
+            Bukkit.getOnlinePlayers().stream().filter(player -> !(!(permission != null ? player.hasPermission(permission) : true))).map(player -> {
                 baseComponents.clear();
-                for (JsonComponent jsonComponent : PluginControl.getJsonComponents()) {
+                PluginControl.getJsonComponents().stream().forEach(jsonComponent -> {
                     BaseComponent bc = new TextComponent(MessageUtil.toPlaceholderAPIResult(jsonComponent.getComponent().toPlainText(), player));
                     bc.setClickEvent(jsonComponent.getClickEvent());
                     bc.setHoverEvent(jsonComponent.getHoverEvent());
@@ -121,49 +127,53 @@ public class Announcement
                         hover[i] = new TextComponent(MessageUtil.toPlaceholderAPIResult(hover[i].toPlainText(), player));
                     }
                     baseComponents.put(jsonComponent.getPlaceholder(), bc);
-                }
+                });
+                return player;
+            }).forEach(player -> {
                 MessageUtil.sendJsonMessage(player, message, baseComponents);
-            }
-            if (!titlesOfBroadcast.isEmpty() && !Bukkit.getOnlinePlayers().isEmpty()) {
-                Thread thread = new Thread(() -> {
-                    for (TitleOfBroadcast title : titlesOfBroadcast) {
-                        for (Player player : Bukkit.getOnlinePlayers()) {
-                            if (!(permission != null ? player.hasPermission(permission) : true)) continue;
-                            TitleUtil.sendTitle(player, title);
-                        }
-                        try {
-                            Thread.sleep((long) (title.getDelay() * 1000));
-                        } catch (InterruptedException ex) {
-                            ex.printStackTrace();
-                        }
-                    }
-                }, "LiteAnnouncer-TitleThread");
-                thread.start();
-            }
-            if (!actionBarsOfBroadcast.isEmpty() && !Bukkit.getOnlinePlayers().isEmpty()) {
-                Thread thread = new Thread(() -> {
-                    for (ActionBarOfBroadcast actionbar : actionBarsOfBroadcast) {
-                        for (Player player : Bukkit.getOnlinePlayers()) {
-                            if (!(permission != null ? player.hasPermission(permission) : true)) continue;
-                            ActionBarUtil.sendActionBar(player, actionbar);
-                        }
-                        try {
-                            Thread.sleep((long) (actionbar.getDelay() * 1000));
-                        } catch (InterruptedException ex) {
-                            ex.printStackTrace();
-                        }
-                    }
-                }, "LiteAnnouncer-ActionBarThread");
-                thread.start();
-            }
-            if (PluginControl.enabledConsoleBroadcast()) {
-                baseComponents.clear();
-                CommandSender console = Bukkit.getConsoleSender();
-                for (JsonComponent jsonComponent : PluginControl.getJsonComponents()) {
-                    baseComponents.put(jsonComponent.getPlaceholder(), jsonComponent.getComponent());
+                if (PluginControl.enabledConsoleBroadcast()) {
+                    baseComponents.clear();
+                    CommandSender console = Bukkit.getConsoleSender();
+                    PluginControl.getJsonComponents().stream().forEach(jsonComponent -> {
+                        baseComponents.put(jsonComponent.getPlaceholder(), jsonComponent.getComponent());
+                    });
+                    MessageUtil.sendJsonMessage(console, message, baseComponents);
                 }
-                MessageUtil.sendJsonMessage(console, message, baseComponents);
-            }
+            });
+        });
+        if (!titlesOfBroadcast.isEmpty() && !Bukkit.getOnlinePlayers().isEmpty()) {
+            Thread thread = new Thread(() -> {
+                titlesOfBroadcast.stream().map(title -> {
+                    Bukkit.getOnlinePlayers().stream().filter(player -> !(!(permission != null ? player.hasPermission(permission) : true))).forEach(player -> {
+                        TitleUtil.sendTitle(player, title);
+                    });
+                    return title;
+                }).forEach(title -> {
+                    try {
+                        Thread.sleep((long) (title.getDelay() * 1000));
+                    } catch (InterruptedException ex) {
+                        ex.printStackTrace();
+                    }
+                });
+            }, "LiteAnnouncer-TitleThread");
+            thread.start();
+        }
+        if (!actionBarsOfBroadcast.isEmpty() && !Bukkit.getOnlinePlayers().isEmpty()) {
+            Thread thread = new Thread(() -> {
+                actionBarsOfBroadcast.stream().map(actionbar -> {
+                    Bukkit.getOnlinePlayers().stream().filter((player) -> !(!(permission != null ? player.hasPermission(permission) : true))).forEach((player) -> {
+                        ActionBarUtil.sendActionBar(player, actionbar);
+                    });
+                    return actionbar;
+                }).forEach((actionbar) -> {
+                    try {
+                        Thread.sleep((long) (actionbar.getDelay() * 1000));
+                    } catch (InterruptedException ex) {
+                        ex.printStackTrace();
+                    }
+                });
+            }, "LiteAnnouncer-ActionBarThread");
+            thread.start();
         }
     }
     

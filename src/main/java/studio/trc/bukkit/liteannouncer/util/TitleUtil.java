@@ -9,7 +9,7 @@ import java.util.HashMap;
 
 import org.bukkit.entity.Player;
 
-import studio.trc.bukkit.liteannouncer.util.tools.TitleOfBroadcast;
+import studio.trc.bukkit.liteannouncer.util.tools.Title;
 
 public class TitleUtil
 {
@@ -92,7 +92,7 @@ public class TitleUtil
         }
     }
     
-    public static void sendTitle(Player player, TitleOfBroadcast titleOfBroadcast) {
+    public static void sendTitle(Player player, Title titleOfBroadcast) {
         sendTitle(player, titleOfBroadcast.getTitle(), titleOfBroadcast.getSubTitle(), titleOfBroadcast.getFadein(), titleOfBroadcast.getStay(), titleOfBroadcast.getFadeout());
     }
     

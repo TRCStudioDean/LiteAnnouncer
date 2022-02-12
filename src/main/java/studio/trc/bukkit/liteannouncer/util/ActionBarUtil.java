@@ -11,7 +11,7 @@ import java.util.UUID;
 
 import org.bukkit.entity.Player;
 
-import studio.trc.bukkit.liteannouncer.util.tools.ActionBarOfBroadcast;
+import studio.trc.bukkit.liteannouncer.util.tools.ActionBar;
 
 public class ActionBarUtil
 {
@@ -81,7 +81,7 @@ public class ActionBarUtil
         }
     }
     
-    public static void sendActionBar(Player player, ActionBarOfBroadcast actionbar) {
+    public static void sendActionBar(Player player, ActionBar actionbar) {
         sendActionBar(player, actionbar.getText());
     }
     

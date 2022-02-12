@@ -11,12 +11,12 @@ public class AnnouncerThread
     
     @Override
     public void run() {
-        if (PluginControl.getAnnouncements().isEmpty()) {
+        if (PluginControl.getAnnouncementsByPriority().isEmpty()) {
             return;
         }
         while (isRunning) {
             try {
-                new ArrayList<>(PluginControl.getAnnouncements()).stream().filter(running -> isRunning).forEach(announcement -> {
+                new ArrayList<>(PluginControl.getAnnouncementsByPriority()).stream().filter(running -> isRunning).forEach(announcement -> {
                     announcement.broadcast(this);
                 });
             } catch (Throwable t) {

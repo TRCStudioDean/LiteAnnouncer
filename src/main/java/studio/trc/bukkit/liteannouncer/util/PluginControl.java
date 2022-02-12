@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
@@ -23,8 +24,8 @@ import studio.trc.bukkit.liteannouncer.async.AnnouncerThread;
 import studio.trc.bukkit.liteannouncer.configuration.Configuration;
 import studio.trc.bukkit.liteannouncer.configuration.ConfigurationType;
 import studio.trc.bukkit.liteannouncer.configuration.ConfigurationUtil;
-import studio.trc.bukkit.liteannouncer.util.tools.ActionBarOfBroadcast;
-import studio.trc.bukkit.liteannouncer.util.tools.TitleOfBroadcast;
+import studio.trc.bukkit.liteannouncer.util.tools.ActionBar;
+import studio.trc.bukkit.liteannouncer.util.tools.Title;
 
 public class PluginControl
 {
@@ -92,12 +93,16 @@ public class PluginControl
                     thread = new AnnouncerThread();
                     thread.start();
                     thread.isRunning = true;
-                    LiteAnnouncerProperties.sendOperationMessage("AnnouncerWorkBegins", new HashMap());
+                    Map<String, String> placeholders = new HashMap();
+                    placeholders.put("{number}", String.valueOf(getAnnouncementsByPriority().size()));
+                    LiteAnnouncerProperties.sendOperationMessage("AnnouncerWorkBegins", placeholders);
                 } else {
                     thread = new AnnouncerThread();
                     thread.isRunning = true;
                     thread.start();
-                    LiteAnnouncerProperties.sendOperationMessage("AnnouncerWorkBegins", new HashMap());
+                    Map<String, String> placeholders = new HashMap();
+                    placeholders.put("{number}", String.valueOf(getAnnouncementsByPriority().size()));
+                    LiteAnnouncerProperties.sendOperationMessage("AnnouncerWorkBegins", placeholders);
                 }
             }
         }.runTask(Main.getInstance());
@@ -113,16 +118,16 @@ public class PluginControl
     public static void reloadAnnouncements() {
         cacheAnnouncement.clear();
         Configuration config = ConfigurationUtil.getConfig(ConfigurationType.ANNOUNCEMENTS);
-        for (String path : config.getStringList("Priority")) {
+        for (String path : config.getConfigurationSection("Announcements").getKeys(false)) {
             try {
                 String name = config.getString("Announcements." + path + ".Name");
                 String permission = config.getString("Announcements." + path + ".Permission");
                 double delay = config.getDouble("Announcements." + path + ".Delay");
                 List<String> messages = config.getStringList("Announcements." + path + ".Messages");
-                Announcement announcement = new Announcement(name, delay, messages, permission);
+                Announcement announcement = new Announcement(path, name, delay, messages, permission);
                 if (config.get("Announcements." + path + ".Titles.Task-Sequence") != null && config.getBoolean("Announcements." + path + ".Titles.Enabled")) {
-                    Map<String, TitleOfBroadcast> titles = new HashMap();
-                    for (String section : config.getConfigurationSection("Announcements." + path + ".Titles.Titles-Setting").getKeys(false)) {
+                    Map<String, Title> titles = new HashMap();
+                    config.getConfigurationSection("Announcements." + path + ".Titles.Titles-Setting").getKeys(false).stream().forEach(section -> {
                         try {
                             double fadein = config.getDouble("Announcements." + path + ".Titles.Titles-Setting." + section + ".Fade-In");
                             double stay = config.getDouble("Announcements." + path + ".Titles.Titles-Setting." + section + ".Stay");
@@ -130,7 +135,7 @@ public class PluginControl
                             double titleDelay = config.getDouble("Announcements." + path + ".Titles.Titles-Setting." + section + ".Delay");
                             String title = config.getString("Announcements." + path + ".Titles.Titles-Setting." + section + ".Title");
                             String subTitle = config.getString("Announcements." + path + ".Titles.Titles-Setting." + section + ".Sub-Title");
-                            titles.put(section, new TitleOfBroadcast(fadein, stay, fadeout, titleDelay, title, subTitle));
+                            titles.put(section, new Title(fadein, stay, fadeout, titleDelay, title, subTitle));
                         } catch (Exception ex) {
                             Map<String, String> placeholders = new HashMap();
                             placeholders.put("{exception}", ex.getLocalizedMessage() != null ? ex.getLocalizedMessage() : "null");
@@ -138,17 +143,15 @@ public class PluginControl
                             LiteAnnouncerProperties.sendOperationMessage("LoadingTitleFailed", placeholders);
                             ex.printStackTrace();
                         }
-                    }
-                    List<TitleOfBroadcast> sequence = new LinkedList();
-                    for (String title : config.getStringList("Announcements." + path + ".Titles.Task-Sequence")) {
-                        if  (titles.get(title) != null) {
-                            sequence.add(titles.get(title));
-                        }
-                    }
+                    });
+                    List<Title> sequence = new LinkedList();
+                    config.getStringList("Announcements." + path + ".Titles.Task-Sequence").stream().filter(title -> titles.get(title) != null).forEach(title -> {
+                        sequence.add(titles.get(title));
+                    });
                     announcement.setTitlesOfBroadcast(sequence);
                 }
                 if (config.get("Announcements." + path + ".ActionBars.Task-Sequence") != null && config.getBoolean("Announcements." + path + ".ActionBars.Enabled")) {
-                    List<ActionBarOfBroadcast> actionbars = new LinkedList();
+                    List<ActionBar> actionbars = new LinkedList();
                     for (Map<String, Object> maps : (List<Map<String, Object>>) config.getList("Announcements." + path + ".ActionBars.Task-Sequence")) {
                         String actionbar = null;
                         try {
@@ -158,7 +161,7 @@ public class PluginControl
                                 actionbar = string;
                                 break;
                             }
-                            actionbars.add(new ActionBarOfBroadcast(actionbar, actionbarDelay));
+                            actionbars.add(new ActionBar(actionbar, actionbarDelay));
                         } catch (Exception ex) {
                             Map<String, String> placeholders = new HashMap();
                             placeholders.put("{exception}", ex.getLocalizedMessage() != null ? ex.getLocalizedMessage() : "null");
@@ -186,7 +189,7 @@ public class PluginControl
     public static void reloadJsonComponents() {
         cacheJsonComponent.clear();
         Configuration config = ConfigurationUtil.getConfig(ConfigurationType.COMPONENTS);
-        for (String path : config.getConfigurationSection("Json-Components").getKeys(false)) {
+        config.getConfigurationSection("Json-Components").getKeys(false).stream().forEach(path -> {
             try {
                 String placeholder = config.getString("Json-Components." + path + ".Placeholder");
                 HoverEvent he = null;
@@ -220,7 +223,7 @@ public class PluginControl
                 LiteAnnouncerProperties.sendOperationMessage("LoadingJsonComponentFailed", placeholders);
                 ex.printStackTrace();
             }
-        }
+        });
         Map<String, String> placeholders = new HashMap();
         placeholders.put("{components}", String.valueOf(cacheJsonComponent.size()));
         LiteAnnouncerProperties.sendOperationMessage("LoadingComponents", placeholders);
@@ -228,6 +231,13 @@ public class PluginControl
     
     public static List<Announcement> getAnnouncements() {
         return cacheAnnouncement;
+    }
+    
+    public static List<Announcement> getAnnouncementsByPriority() {
+        return (List<Announcement>) ConfigurationUtil.getConfig(ConfigurationType.ANNOUNCEMENTS).getList("Priority").stream()
+                .map(announcement -> cacheAnnouncement.stream().filter(loadedAnnouncement -> loadedAnnouncement.getConfigPath().equals(announcement)).findFirst().orElse(null))
+                .filter(element -> element != null)
+                .collect(Collectors.toList());
     }
     
     public static List<JsonComponent> getJsonComponents() {

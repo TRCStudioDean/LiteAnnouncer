@@ -1,8 +1,8 @@
-package studio.trc.bukkit.liteannouncer.util.tools;
+package studio.trc.bungee.liteannouncer.util.tools;
 
 import lombok.Getter;
 
-public class TitleOfBroadcast
+public class Title
 {
     @Getter
     private final double fadein;
@@ -17,7 +17,7 @@ public class TitleOfBroadcast
     @Getter
     private final String subTitle;
     
-    public TitleOfBroadcast(double fadein, double stay, double fadeout, double delay, String title, String subTitle) {
+    public Title(double fadein, double stay, double fadeout, double delay, String title, String subTitle) {
         this.fadein = fadein;
         this.stay = stay;
         this.fadeout = fadeout;
