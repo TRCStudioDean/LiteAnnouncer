@@ -114,9 +114,9 @@ public class Announcement
     }
     
     public void broadcast() {
+        Map<String, BaseComponent> baseComponents = new HashMap();
         messages.stream().forEach(message -> {
-            Map<String, BaseComponent> baseComponents = new HashMap();
-            Bukkit.getOnlinePlayers().stream().filter(player -> !(!(permission != null ? player.hasPermission(permission) : true))).map(player -> {
+            Bukkit.getOnlinePlayers().stream().filter(player -> permission != null ? player.hasPermission(permission) : true).forEach(player -> {
                 baseComponents.clear();
                 PluginControl.getJsonComponents().stream().forEach(jsonComponent -> {
                     BaseComponent bc = new TextComponent(MessageUtil.toPlaceholderAPIResult(jsonComponent.getComponent().toPlainText(), player));
@@ -128,18 +128,18 @@ public class Announcement
                     }
                     baseComponents.put(jsonComponent.getPlaceholder(), bc);
                 });
-                return player;
-            }).forEach(player -> {
                 MessageUtil.sendJsonMessage(player, message, baseComponents);
-                if (PluginControl.enabledConsoleBroadcast()) {
-                    baseComponents.clear();
-                    CommandSender console = Bukkit.getConsoleSender();
-                    PluginControl.getJsonComponents().stream().forEach(jsonComponent -> {
-                        baseComponents.put(jsonComponent.getPlaceholder(), jsonComponent.getComponent());
-                    });
-                    MessageUtil.sendJsonMessage(console, message, baseComponents);
-                }
             });
+        });
+        CommandSender console = Bukkit.getConsoleSender();
+        messages.stream().forEach(message -> {
+            if (PluginControl.enabledConsoleBroadcast()) {
+                baseComponents.clear();
+                PluginControl.getJsonComponents().stream().forEach(jsonComponent -> {
+                    baseComponents.put(jsonComponent.getPlaceholder(), jsonComponent.getComponent());
+                });
+                MessageUtil.sendJsonMessage(console, message, baseComponents);
+            }
         });
         if (!titlesOfBroadcast.isEmpty() && !Bukkit.getOnlinePlayers().isEmpty()) {
             Thread thread = new Thread(() -> {

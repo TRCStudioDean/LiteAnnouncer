@@ -124,8 +124,8 @@ public class Announcement
     public void broadcast() {
         ProxyServer proxy = ProxyServer.getInstance();
         Map<String, BaseComponent> baseComponents = new HashMap();
-        messages.stream().map(message -> {
-            proxy.getPlayers().stream().filter(player -> !(!whitelist(player) || !(permission != null ? player.hasPermission(permission) : true))).map(player -> {
+        messages.stream().forEach(message -> {
+            proxy.getPlayers().stream().filter(player -> whitelist(player) && (permission != null ? player.hasPermission(permission) : true)).forEach(player -> {
                 baseComponents.clear();
                 PluginControl.getJsonComponents().stream().forEach(jsonComponent -> {
                     BaseComponent bc = new TextComponent(MessageUtil.toLocallyPlaceholders(jsonComponent.getComponent().toPlainText(), player));
@@ -137,12 +137,10 @@ public class Announcement
                     }
                     baseComponents.put(jsonComponent.getPlaceholder(), bc);
                 });
-                return player;
-            }).filter(player -> permission != null ? player.hasPermission(permission) : true).forEach(player -> {
                 MessageUtil.sendJsonMessage(player, MessageUtil.toLocallyPlaceholders(message, player), baseComponents);
             });
-            return message;
-        }).forEach(message -> {
+        });
+        messages.stream().forEach(message -> {
             if (PluginControl.enabledConsoleBroadcast()) {
                 baseComponents.clear();
                 PluginControl.getJsonComponents().stream().forEach(jsonComponent -> {

@@ -1,5 +1,5 @@
 name: LiteAnnouncer
-version: 1.2.0-SNAPSHOT
+version: 1.2.0
 author: TRCStudioDean
 main: studio.trc.bukkit.liteannouncer.Main
 api-version: 1.13
