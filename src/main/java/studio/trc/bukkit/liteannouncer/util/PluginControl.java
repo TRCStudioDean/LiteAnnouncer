@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.stream.Collectors;
 
 import net.md_5.bungee.api.ChatColor;
@@ -61,6 +62,10 @@ public class PluginControl
     
     public static boolean enableMetrics() {
         return ConfigurationUtil.getConfig(ConfigurationType.CONFIG).getBoolean("Metrics");
+    }
+    
+    public static boolean randomBroadcast() {
+        return ConfigurationUtil.getConfig(ConfigurationType.ANNOUNCEMENTS).getBoolean("Random-Broadcast");
     }
     
     public static void reload() {
@@ -231,6 +236,13 @@ public class PluginControl
     
     public static List<Announcement> getAnnouncements() {
         return cacheAnnouncement;
+    }
+    
+    private static final Random random = new Random();
+    
+    public static Announcement getAnnouncementByRandom() {
+        List<Announcement> announcements = getAnnouncementsByPriority();
+        return announcements.get(random.nextInt(announcements.size() - 1));
     }
     
     public static List<Announcement> getAnnouncementsByPriority() {

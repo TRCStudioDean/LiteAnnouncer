@@ -1,3 +1,7 @@
+#Whether to broadcast the announcement randomly
+#When enabled, the announcements in the priority list will be broadcast randomly
+Random-Broadcast: false
+
 #Announcements priority. (From top to bottom)
 Priority:
 - example-announcement

@@ -16,9 +16,15 @@ public class AnnouncerThread
         }
         while (isRunning) {
             try {
-                new ArrayList<>(PluginControl.getAnnouncementsByPriority()).stream().filter(running -> isRunning).forEach(announcement -> {
-                    announcement.broadcast(this);
-                });
+                if (PluginControl.randomBroadcast()) {
+                    if (isRunning) {
+                        PluginControl.getAnnouncementByRandom().broadcast(this);
+                    }
+                } else {
+                    new ArrayList<>(PluginControl.getAnnouncementsByPriority()).stream().filter(running -> isRunning).forEach(announcement -> {
+                        announcement.broadcast(this);
+                    });
+                }
             } catch (Throwable t) {
                 t.printStackTrace();
             }

@@ -1,3 +1,7 @@
+#是否随机播报公告
+#启用后优先级列表中的公告将随机播报
+Random-Broadcast: false
+
 #公告的优先级，顺序是从上往下
 Priority:
 - example-announcement
