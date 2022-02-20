@@ -211,11 +211,20 @@ public class PluginControl
         return cacheAnnouncement;
     }
     
-    private static final Random random = new Random();
-    
     public static Announcement getAnnouncementByRandom() {
         List<Announcement> announcements = getAnnouncementsByPriority();
-        return announcements.get(random.nextInt(announcements.size() - 1));
+        return announcements.get(getRandom(1, announcements.size()) - 1);
+    }
+    
+    public static int getRandom(int number1, int number2) {
+        if (number1 == number2) {
+            return number1;
+        } else if (number1 > number2) {
+            return new Random().nextInt(number1 - number2 + 1) + number2;
+        } else if (number2 > number1) {
+            return new Random().nextInt(number2 - number1 + 1) + number1;
+        }
+        return 0;
     }
     
     public static List<Announcement> getAnnouncementsByPriority() {
