@@ -2,7 +2,7 @@ English:
     No-Permission: '{prefix}&cYou don''t have permission to do this!'
     Repaired-Config-Section: '{prefix}&cPlugin cannot obtain the configuration file &e{config} &c path &7{path}&c, which has been fixed by obtaining the default configuration file.'
     Command-Messages:
-        Unknown-Command: '{prefix}&cUnknown command, Please use &6/signin help &cto view command list.'
+        Unknown-Command: '{prefix}&cUnknown command, Please use &6/la help &cto view command list.'
         Help-Command: 
         - '{prefix}&aUsage help &f&l>>>'
         - ' &6/la help &cView command help.'

@@ -30,9 +30,6 @@ public class Main
         
         LiteAnnouncerCommand commandExecutor = new LiteAnnouncerCommand();
         Bukkit.getPluginCommand("la").setExecutor(commandExecutor);
-        Bukkit.getPluginCommand("liteannouncer").setExecutor(commandExecutor);
-        Bukkit.getPluginCommand("la").setTabCompleter(commandExecutor);
-        Bukkit.getPluginCommand("liteannouncer").setTabCompleter(commandExecutor);
         Bukkit.getPluginManager().registerEvents(new Updater(), this);
         
         PluginControl.reload();

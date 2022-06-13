@@ -3,10 +3,8 @@ package studio.trc.bukkit.liteannouncer.util;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.UUID;
 
 import org.bukkit.entity.Player;
@@ -27,12 +25,10 @@ public class ActionBarUtil
     public static void initialize() {
         String nmsVersion = PluginControl.getNMSVersion();
         try {
-            if (nmsVersion.startsWith("v1_17") || nmsVersion.startsWith("v1_18")) {
+            if (nmsVersion.startsWith("v1_17") || nmsVersion.startsWith("v1_18") || nmsVersion.startsWith("v1_19")) {
                 chatMessageType = Class.forName("net.minecraft.network.chat.ChatMessageType");
-                chatComponentText = Class.forName("net.minecraft.network.chat.ChatComponentText");
                 interfaceChatBaseComponent = Class.forName("net.minecraft.network.chat.IChatBaseComponent");
                 packet = Class.forName("net.minecraft.network.protocol.Packet");
-                packetPlayOutChat = Class.forName("net.minecraft.network.protocol.game.PacketPlayOutChat");
                 clientboundSetActionBarTextPacket = Class.forName("net.minecraft.network.protocol.game.ClientboundSetActionBarTextPacket");
                 craftChatMessage = Class.forName("org.bukkit.craftbukkit." + nmsVersion + ".util.CraftChatMessage");
             } else {
@@ -45,7 +41,9 @@ public class ActionBarUtil
                 chatMessageType = Class.forName("net.minecraft.server." + nmsVersion + ".ChatMessageType");
             }
             craftPlayer = Class.forName("org.bukkit.craftbukkit." + nmsVersion + ".entity.CraftPlayer");
-        } catch (Exception ex) {}
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
     }
     
     public static void sendActionBar(Player player, String text) {
