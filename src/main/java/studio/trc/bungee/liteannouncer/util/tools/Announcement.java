@@ -15,8 +15,11 @@ import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
+import net.md_5.bungee.config.Configuration;
 
 import studio.trc.bungee.liteannouncer.async.AnnouncerThread;
+import studio.trc.bungee.liteannouncer.configuration.ConfigurationType;
+import studio.trc.bungee.liteannouncer.configuration.ConfigurationUtil;
 import studio.trc.bungee.liteannouncer.util.MessageUtil;
 import studio.trc.bungee.liteannouncer.util.PluginControl;
 
@@ -125,7 +128,7 @@ public class Announcement
         ProxyServer proxy = ProxyServer.getInstance();
         Map<String, BaseComponent> baseComponents = new HashMap();
         messages.stream().forEach(message -> {
-            proxy.getPlayers().stream().filter(player -> whitelist(player) && (permission != null ? player.hasPermission(permission) : true)).forEach(player -> {
+            proxy.getPlayers().stream().filter(player -> !ignoreAnnouncement(player) && whitelist(player) && (permission != null ? player.hasPermission(permission) : true)).forEach(player -> {
                 baseComponents.clear();
                 PluginControl.getJsonComponents().stream().forEach(jsonComponent -> {
                     BaseComponent bc = new TextComponent(MessageUtil.toLocallyPlaceholders(jsonComponent.getComponent().toPlainText(), player));
@@ -152,14 +155,14 @@ public class Announcement
         if (!titlesOfBroadcast.isEmpty() && !proxy.getPlayers().isEmpty()) {
             Thread thread = new Thread(() -> {
                 titlesOfBroadcast.stream().map(title -> {
-                    proxy.getPlayers().stream().filter(player -> !(!whitelist(player) || !(permission != null ? player.hasPermission(permission) : true))).forEach(player -> {
+                    proxy.getPlayers().stream().filter(player -> !ignoreAnnouncement(player) && whitelist(player) && (permission != null ? player.hasPermission(permission) : true)).forEach(player -> {
                         proxy.createTitle()
-                                .fadeIn((int) (title.getFadein() * 20))
-                                .stay((int) (title.getStay() * 20))
-                                .fadeOut((int) (title.getFadeout() * 20))
-                                .title(new TextComponent(MessageUtil.toLocallyPlaceholders(title.getTitle(), player)))
-                                .subTitle(new TextComponent(MessageUtil.toLocallyPlaceholders(title.getSubTitle(), player)))
-                                .send(player);
+                            .fadeIn((int) (title.getFadein() * 20))
+                            .stay((int) (title.getStay() * 20))
+                            .fadeOut((int) (title.getFadeout() * 20))
+                            .title(new TextComponent(MessageUtil.toLocallyPlaceholders(title.getTitle(), player)))
+                            .subTitle(new TextComponent(MessageUtil.toLocallyPlaceholders(title.getSubTitle(), player)))
+                            .send(player);
                     });
                     return title;
                 }).forEach(title -> {
@@ -175,7 +178,7 @@ public class Announcement
         if (!actionBarsOfBroadcast.isEmpty() && !proxy.getPlayers().isEmpty()) {
             Thread thread = new Thread(() -> {
                 actionBarsOfBroadcast.stream().map(actionbar -> {
-                    proxy.getPlayers().stream().filter(player -> !(!whitelist(player) || !(permission != null ? player.hasPermission(permission) : true))).forEach(player -> {
+                    proxy.getPlayers().stream().filter(player -> !ignoreAnnouncement(player) && whitelist(player) && (permission != null ? player.hasPermission(permission) : true)).forEach(player -> {
                         player.sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(MessageUtil.toLocallyPlaceholders(actionbar.getText(), player)));
                     });
                     return actionbar;
@@ -215,5 +218,12 @@ public class Announcement
             inWhitelist = true;
         }
         return inWhitelist;
+    }
+    
+    public boolean ignoreAnnouncement(ProxiedPlayer player) {
+        Configuration data = ConfigurationUtil.getFileConfiguration(ConfigurationType.PLAYER_DATA);
+        if (data.get("PlayerData." + player.getUniqueId()) == null || data.get("PlayerData." + player.getUniqueId() + ".Ignored-Announcements") == null) return false;
+        if (data.getStringList("PlayerData." + player.getUniqueId() + ".Ignored-Announcements").stream().anyMatch(announcementName -> announcementName.equalsIgnoreCase("ALL"))) return true;
+        return data.getStringList("PlayerData." + player.getUniqueId() + ".Ignored-Announcements").contains(name);
     }
 }

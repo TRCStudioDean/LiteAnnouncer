@@ -14,9 +14,12 @@ import net.md_5.bungee.api.chat.TextComponent;
 
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 
 import studio.trc.bukkit.liteannouncer.async.AnnouncerThread;
+import studio.trc.bukkit.liteannouncer.configuration.ConfigurationType;
+import studio.trc.bukkit.liteannouncer.configuration.ConfigurationUtil;
 import studio.trc.bukkit.liteannouncer.util.ActionBarUtil;
 import studio.trc.bukkit.liteannouncer.util.MessageUtil;
 import studio.trc.bukkit.liteannouncer.util.PluginControl;
@@ -116,7 +119,7 @@ public class Announcement
     public void broadcast() {
         Map<String, BaseComponent> baseComponents = new HashMap();
         messages.stream().forEach(message -> {
-            Bukkit.getOnlinePlayers().stream().filter(player -> permission != null ? player.hasPermission(permission) : true).forEach(player -> {
+            Bukkit.getOnlinePlayers().stream().filter(player -> !ignoreAnnouncement(player) && (permission != null ? player.hasPermission(permission) : true)).forEach(player -> {
                 baseComponents.clear();
                 PluginControl.getJsonComponents().stream().forEach(jsonComponent -> {
                     BaseComponent bc = new TextComponent(MessageUtil.toPlaceholderAPIResult(jsonComponent.getComponent().toPlainText(), player));
@@ -144,7 +147,7 @@ public class Announcement
         if (!titlesOfBroadcast.isEmpty() && !Bukkit.getOnlinePlayers().isEmpty()) {
             Thread thread = new Thread(() -> {
                 titlesOfBroadcast.stream().map(title -> {
-                    Bukkit.getOnlinePlayers().stream().filter(player -> !(!(permission != null ? player.hasPermission(permission) : true))).forEach(player -> {
+                    Bukkit.getOnlinePlayers().stream().filter(player -> !ignoreAnnouncement(player) && permission != null ? player.hasPermission(permission) : true).forEach(player -> {
                         TitleUtil.sendTitle(player, title);
                     });
                     return title;
@@ -161,7 +164,7 @@ public class Announcement
         if (!actionBarsOfBroadcast.isEmpty() && !Bukkit.getOnlinePlayers().isEmpty()) {
             Thread thread = new Thread(() -> {
                 actionBarsOfBroadcast.stream().map(actionbar -> {
-                    Bukkit.getOnlinePlayers().stream().filter((player) -> !(!(permission != null ? player.hasPermission(permission) : true))).forEach((player) -> {
+                    Bukkit.getOnlinePlayers().stream().filter(player -> !ignoreAnnouncement(player) && permission != null ? player.hasPermission(permission) : true).forEach((player) -> {
                         ActionBarUtil.sendActionBar(player, actionbar);
                     });
                     return actionbar;
@@ -186,5 +189,12 @@ public class Announcement
         } catch (InterruptedException ex) {
             Logger.getLogger(Announcement.class.getName()).log(Level.SEVERE, null, ex);
         }
+    }
+    
+    public boolean ignoreAnnouncement(Player player) {
+        FileConfiguration data = ConfigurationUtil.getFileConfiguration(ConfigurationType.PLAYER_DATA);
+        if (data.get("PlayerData." + player.getUniqueId()) == null || data.get("PlayerData." + player.getUniqueId() + ".Ignored-Announcements") == null) return false;
+        if (data.getStringList("PlayerData." + player.getUniqueId() + ".Ignored-Announcements").stream().anyMatch(announcementName -> announcementName.equalsIgnoreCase("ALL"))) return true;
+        return data.getStringList("PlayerData." + player.getUniqueId() + ".Ignored-Announcements").contains(name);
     }
 }

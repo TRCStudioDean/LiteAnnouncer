@@ -9,8 +9,6 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import net.md_5.bungee.config.Configuration;
 import net.md_5.bungee.config.ConfigurationProvider;
@@ -23,74 +21,25 @@ import studio.trc.bungee.liteannouncer.util.MessageUtil;
 public class ConfigurationUtil
 {
     public static ConfigurationProvider provider = ConfigurationProvider.getProvider(YamlConfiguration.class);
-    private static Configuration config = new Configuration();
-    private static Configuration announcements = new Configuration();
-    private static Configuration components = new Configuration();
-    private static Configuration messages = new Configuration();
+    private final static Map<ConfigurationType, ConfigurationFile> cacheConfig = new HashMap();
     
     public static Configuration getFileConfiguration(ConfigurationType fileType) {
-        switch (fileType) {
-            case CONFIG: return config;
-            case ANNOUNCEMENTS: return announcements;
-            case COMPONENTS: return components;
-            case MESSAGES: return messages;
-            default: return null;
-        }
+        return ConfigurationUtil.getConfig(fileType).getRawConfig();
     }
-    
-    private final static Map<ConfigurationType, ConfigurationFile> cacheConfig = new HashMap();
     
     public static ConfigurationFile getConfig(ConfigurationType fileType) {
         if (cacheConfig.containsKey(fileType)) {
             return cacheConfig.get(fileType);
         }
-        switch (fileType) {
-            case CONFIG: {
-                ConfigurationFile file = new ConfigurationFile(config, fileType);
-                cacheConfig.put(fileType, file);
-                return file;
-            }
-            case ANNOUNCEMENTS: {
-                ConfigurationFile file = new ConfigurationFile(announcements, fileType);
-                cacheConfig.put(fileType, file);
-                return file;
-            }
-            case COMPONENTS: {
-                ConfigurationFile file = new ConfigurationFile(components, fileType);
-                cacheConfig.put(fileType, file);
-                return file;
-            }
-            case MESSAGES: {
-                ConfigurationFile file = new ConfigurationFile(messages, fileType);
-                cacheConfig.put(fileType, file);
-                return file;
-            }
-            default: return null;
-        }
+        ConfigurationFile config = new ConfigurationFile(new Configuration(), fileType);
+        cacheConfig.put(fileType, config);
+        return config;
     }
     
     public static void reloadConfig(ConfigurationType fileType) {
-        cacheConfig.remove(fileType);
         saveResource(fileType);
-        try (InputStreamReader configReader = new InputStreamReader(new FileInputStream("plugins/LiteAnnouncer/" + fileType.getFileName()), "UTF-8")) {
-            switch (fileType) {
-                case ANNOUNCEMENTS: {
-                    announcements = provider.load(configReader);
-                    break;
-                }
-                case COMPONENTS: {
-                    components = provider.load(configReader);
-                    break;
-                }
-                case CONFIG: {
-                    config = provider.load(configReader);
-                    break;
-                }
-                case MESSAGES: {
-                    messages = provider.load(configReader);
-                    break;
-                }
-            }
+        try (InputStreamReader config = new InputStreamReader(new FileInputStream("plugins/LiteAnnouncer/" + fileType.getFileName()), "UTF-8")) {
+            getConfig(fileType).setConfig(provider.load(config));
         } catch (IOException ex) {
             File oldFile = new File("plugins/LiteAnnouncer/" + fileType.getFileName() + ".old");
             File file = new File("plugins/LiteAnnouncer/" + fileType.getFileName());
@@ -117,76 +66,23 @@ public class ConfigurationUtil
         }
     }
 
-    private static void saveResource(ConfigurationType file) {
-        if (!new File("plugins/LiteAnnouncer").exists()) {
-            new File("plugins/LiteAnnouncer").mkdir();
+    private static void saveResource(ConfigurationType fileType) {
+        File dataFolder = new File("plugins/LiteAnnouncer/");
+        if (!dataFolder.exists()) {
+            dataFolder.mkdirs();
         }
-        switch (file) {
-            case CONFIG: {
-                try {
-                    File configFile = new File("plugins/LiteAnnouncer/Config.yml");
-                    if (!configFile.exists()) {
-                        configFile.createNewFile();
-                        InputStream is = Main.class.getResourceAsStream("/Languages/" + MessageUtil.Language.getLocaleLanguage().getFolderName() + "/Bungee/Config.yml");
-                        try (OutputStream out = new FileOutputStream(configFile)) {
-                            int b;
-                            while ((b = is.read()) != -1) {
-                                out.write((char) b);
-                            }
-                        }
-                    }
-                } catch (IOException ex) {}
-                break;
+        try {
+            File configFile = new File(dataFolder, fileType.getFileName());
+            if (!configFile.exists()) {
+                configFile.createNewFile();
+                InputStream is = Main.class.getResourceAsStream("/Languages/" + MessageUtil.Language.getLocaleLanguage().getFolderName() + "/Bungee/" + fileType.getFileName());
+                byte[] bytes = new byte[is.available()];
+                for (int len = 0; len != bytes.length; len += is.read(bytes, len, bytes.length - len));
+                try (OutputStream out = new FileOutputStream(configFile)) {
+                    out.write(bytes);
+                }
             }
-            case ANNOUNCEMENTS: {
-                try {
-                    File configFile = new File("plugins/LiteAnnouncer/Announcements.yml");
-                    if (!configFile.exists()) {
-                        configFile.createNewFile();
-                        InputStream is = Main.class.getResourceAsStream("/Languages/" + MessageUtil.Language.getLocaleLanguage().getFolderName() + "/Bungee/Announcements.yml");
-                        try (OutputStream out = new FileOutputStream(configFile)) {
-                            int b;
-                            while ((b = is.read()) != -1) {
-                                out.write((char) b);
-                            }
-                        }
-                    }
-                } catch (IOException ex) {}
-                break;
-            }
-            case COMPONENTS: {
-                try {
-                    File configFile = new File("plugins/LiteAnnouncer/Components.yml");
-                    if (!configFile.exists()) {
-                        configFile.createNewFile();
-                        InputStream is = Main.class.getResourceAsStream("/Languages/" + MessageUtil.Language.getLocaleLanguage().getFolderName() + "/Bungee/Components.yml");
-                        try (OutputStream out = new FileOutputStream(configFile)) {
-                            int b;
-                            while ((b = is.read()) != -1) {
-                                out.write((char) b);
-                            }
-                        }
-                    }
-                } catch (IOException ex) {}
-                break;
-            }
-            case MESSAGES: {
-                try {
-                    File configFile = new File("plugins/LiteAnnouncer/Messages.yml");
-                    if (!configFile.exists()) {
-                        configFile.createNewFile();
-                        InputStream is = Main.class.getResourceAsStream("/Languages/" + MessageUtil.Language.getLocaleLanguage().getFolderName() + "/Bungee/Messages.yml");
-                        try (OutputStream out = new FileOutputStream(configFile)) {
-                            int b;
-                            while ((b = is.read()) != -1) {
-                                out.write((char) b);
-                            }
-                        }
-                    }
-                } catch (IOException ex) {}
-                break;
-            }
-        }
+        } catch (IOException ex) {}
     }
     
     public static void saveConfig() {
@@ -197,26 +93,9 @@ public class ConfigurationUtil
     
     public static void saveConfig(ConfigurationType file) {
         try {
-            switch (file) {
-                case CONFIG: {
-                    provider.save(config, new File("plugins/LiteAnnouncer/Config.yml"));
-                    break;
-                }
-                case ANNOUNCEMENTS: {
-                    provider.save(announcements, new File("plugins/LiteAnnouncer/Announcements.yml"));
-                    break;
-                }
-                case COMPONENTS: {
-                    provider.save(components, new File("plugins/LiteAnnouncer/Components.yml"));
-                    break;
-                }
-                case MESSAGES: {
-                    provider.save(messages, new File("plugins/LiteAnnouncer/Messages.yml"));
-                    break;
-                }
-            }
+            provider.save(getFileConfiguration(file), new File("plugins/LiteAnnouncer/" + file.getFileName()));
         } catch (IOException ex) {
-            Logger.getLogger(ConfigurationUtil.class.getName()).log(Level.SEVERE, null, ex);
+            ex.printStackTrace();
         }
     }
 }

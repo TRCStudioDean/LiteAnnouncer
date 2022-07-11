@@ -5,11 +5,17 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
+import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.entity.Player;
+import studio.trc.bukkit.liteannouncer.configuration.ConfigurationType;
+import studio.trc.bukkit.liteannouncer.configuration.ConfigurationUtil;
 
 import studio.trc.bukkit.liteannouncer.util.MessageUtil;
 import studio.trc.bukkit.liteannouncer.util.PluginControl;
@@ -84,12 +90,81 @@ public class LiteAnnouncerCommand
                     }
                     Map<String, String> placeholders = new HashMap();
                     List<String> name = new ArrayList();
-                    for (Announcement announcement : PluginControl.getAnnouncements()) {
+                    PluginControl.getAnnouncements().stream().forEach(announcement -> {
                         name.add(announcement.getName());
-                    }
+                    });
                     placeholders.put("{list}", name.toString().substring(1, name.toString().length() - 1));
                     MessageUtil.sendMessage(sender, "Command-Messages.List", placeholders);
                     return true;
+                } else if (args[0].equalsIgnoreCase("switch")) {
+                    if (!PluginControl.hasPermission(sender, "Permissions.Commands.Switch")) {
+                        MessageUtil.sendMessage(sender, "No-Permission");
+                        return true;
+                    }
+                    if (args.length < 2) {
+                        MessageUtil.sendMessage(sender, "Command-Messages.Switch.Help");
+                        return true;
+                    }
+                    Player player = Bukkit.getPlayer(args[1]);
+                    Map<String, String> placeholders = new HashMap();
+                    if (player == null) {
+                        placeholders.put("{player}", args[1]);
+                        MessageUtil.sendMessage(sender, "Player-Not-Exist", placeholders);
+                        return true;
+                    }
+                    placeholders.put("{player}", player.getName());
+                    FileConfiguration data = ConfigurationUtil.getFileConfiguration(ConfigurationType.PLAYER_DATA);
+                    List<String> list = data.get("PlayerData." + player.getUniqueId() + ".Ignored-Announcements") != null ? data.getStringList("PlayerData." + player.getUniqueId() + ".Ignored-Announcements") : new ArrayList();
+                    data.set("PlayerData." + player.getUniqueId() + ".Name", player.getName());
+                    if (list.contains("ALL")) {
+                        list.remove("ALL");
+                        data.set("PlayerData." + player.getUniqueId() + ".Ignored-Announcements", list);
+                        ConfigurationUtil.getConfig(ConfigurationType.PLAYER_DATA).saveConfig();
+                        MessageUtil.sendMessage(sender, "Command-Messages.Switch.Switch-On", placeholders);
+                    } else {
+                        list.add("ALL");
+                        data.set("PlayerData." + player.getUniqueId() + ".Ignored-Announcements", list);
+                        ConfigurationUtil.getConfig(ConfigurationType.PLAYER_DATA).saveConfig();
+                        MessageUtil.sendMessage(sender, "Command-Messages.Switch.Switch-Off", placeholders);
+                    }
+                } else if (args[0].equalsIgnoreCase("ignore")) {
+                    if (!PluginControl.hasPermission(sender, "Permissions.Commands.Ignore")) {
+                        MessageUtil.sendMessage(sender, "No-Permission");
+                        return true;
+                    }
+                    if (args.length < 3) {
+                        MessageUtil.sendMessage(sender, "Command-Messages.Ignore.Help");
+                        return true;
+                    }
+                    Player player = Bukkit.getPlayer(args[2]);
+                    Map<String, String> placeholders = new HashMap();
+                    if (player == null) {
+                        placeholders.put("{player}", args[2]);
+                        MessageUtil.sendMessage(sender, "Player-Not-Exist", placeholders);
+                        return true;
+                    }
+                    placeholders.put("{player}", player.getName());
+                    Announcement announcement = PluginControl.getAnnouncementsByPriority().stream().filter(announcement_ -> announcement_.getName().equalsIgnoreCase(args[1])).findFirst().orElse(null);
+                    if (announcement == null) {
+                        placeholders.put("{announcement}", args[1]);
+                        MessageUtil.sendMessage(sender, "Command-Messages.Ignore.Not-Found", placeholders);
+                        return true;
+                    }
+                    placeholders.put("{announcement}", announcement.getName());
+                    FileConfiguration data = ConfigurationUtil.getFileConfiguration(ConfigurationType.PLAYER_DATA);
+                    List<String> list = data.get("PlayerData." + player.getUniqueId() + ".Ignored-Announcements") != null ? data.getStringList("PlayerData." + player.getUniqueId() + ".Ignored-Announcements") : new ArrayList();
+                    data.set("PlayerData." + player.getUniqueId() + ".Name", player.getName());
+                    if (list.contains(announcement.getName())) {
+                        list.remove(announcement.getName());
+                        data.set("PlayerData." + player.getUniqueId() + ".Ignored-Announcements", list);
+                        ConfigurationUtil.getConfig(ConfigurationType.PLAYER_DATA).saveConfig();
+                        MessageUtil.sendMessage(sender, "Command-Messages.Ignore.Ignore-On", placeholders);
+                    } else {
+                        list.add(announcement.getName());
+                        data.set("PlayerData." + player.getUniqueId() + ".Ignored-Announcements", list);
+                        ConfigurationUtil.getConfig(ConfigurationType.PLAYER_DATA).saveConfig();
+                        MessageUtil.sendMessage(sender, "Command-Messages.Ignore.Ignore-Off", placeholders);
+                    }
                 } else {
                     MessageUtil.sendMessage(sender, "Command-Messages.Unknown-Command");
                 }
@@ -106,6 +181,15 @@ public class LiteAnnouncerCommand
             }
             if (args[0].equalsIgnoreCase("broadcast") && args.length == 2 && PluginControl.hasPermission(sender, "Permissions.Commands.Broadcast")) {
                 return getAnnouncements(args[1]);
+            }
+            if (args[0].equalsIgnoreCase("switch") && args.length == 2 && PluginControl.hasPermission(sender, "Permissions.Commands.Switch")) {
+                return getTabPlayersName(args, 2);
+            }
+            if (args[0].equalsIgnoreCase("ignore") && args.length == 2 && PluginControl.hasPermission(sender, "Permissions.Commands.Ignore")) {
+                return getAnnouncements(args[1]);
+            }
+            if (args[0].equalsIgnoreCase("ignore") && args.length == 3 && PluginControl.hasPermission(sender, "Permissions.Commands.Ignore")) {
+                return getTabPlayersName(args, 3);
             }
             return getCommands(args[0]);
         } else {
@@ -125,7 +209,7 @@ public class LiteAnnouncerCommand
     }
     
     private List<String> getCommands(String args) {
-        List<String> commands = Arrays.asList("help", "reload", "broadcast",  "view", "list");
+        List<String> commands = Arrays.asList("help", "reload", "broadcast",  "view", "list", "switch", "ignore");
         if (args != null) {
             List<String> names = new ArrayList();
             commands.stream().filter(command -> command.startsWith(args.toLowerCase())).forEach(command -> {
@@ -134,5 +218,17 @@ public class LiteAnnouncerCommand
             return names;
         }
         return commands;
+    }
+    
+    private List<String> getTabPlayersName(String[] args, int length) {
+        if (args.length == length) {
+            List<String> onlines = Bukkit.getOnlinePlayers().stream().map(player -> player.getName()).collect(Collectors.toList());
+            List<String> names = new ArrayList();
+            onlines.stream().filter(command -> command.toLowerCase().startsWith(args[length - 1].toLowerCase())).forEach(command -> {
+                names.add(command);
+            });
+            return names;
+        }
+        return new ArrayList();
     }
 }
