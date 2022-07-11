@@ -20,7 +20,12 @@ public enum ConfigurationType
     /**
      * Announcements.yml
      */
-    ANNOUNCEMENTS("Announcements.yml");
+    ANNOUNCEMENTS("Announcements.yml"),
+    
+    /**
+     * PlayerData.yml
+     */
+    PLAYER_DATA("PlayerData.yml");
     
     private final String fileName;
     

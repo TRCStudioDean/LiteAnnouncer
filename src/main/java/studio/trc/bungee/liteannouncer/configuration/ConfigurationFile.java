@@ -3,6 +3,7 @@ package studio.trc.bungee.liteannouncer.configuration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import lombok.Setter;
 
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.config.Configuration;
@@ -15,8 +16,9 @@ import studio.trc.bungee.liteannouncer.util.MessageUtil;
  */
 public class ConfigurationFile
 {
-    private final Configuration config;
     private final ConfigurationType type;
+    @Setter
+    private Configuration config;
     
     public ConfigurationFile(Configuration config, ConfigurationType type) {
         this.config = config;

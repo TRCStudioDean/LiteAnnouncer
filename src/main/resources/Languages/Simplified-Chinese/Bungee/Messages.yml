@@ -1,6 +1,7 @@
 Simplified-Chinese:
     No-Permission: '{prefix}&c你没有这么做的权限!'
     Repaired-Config-Section: '{prefix}&c插件无法获取配置文件 &e{config} &c路径 &7{path}&c, 已通过获取默认配置文件进行修复.'
+    Player-Not-Exist: '{prefix}&c玩家 &e{player} &c不存在！'
     Command-Messages:
         Unknown-Command: '{prefix}&c未知命令, 使用&6/la help &c查看帮助'
         Help-Command: 
@@ -10,6 +11,8 @@ Simplified-Chinese:
         - ' &6/la view [公告名称] &c查看一个公告的内容'
         - ' &6/la broadcast [公告名称] &c广播此公告'
         - ' &6/la list &c列出所有已启用的公告'
+        - ' &6/la switch [玩家名] &c开启或关闭玩家的公告显示'
+        - ' &6/la ignore [公告名] [玩家名] &c开启或关闭玩家指定的公告的显示'
         Reload: '{prefix}&a已重载配置文件.'
         View:
             Help: '{prefix}&c使用帮助: /la view [公告名称]'
@@ -18,6 +21,15 @@ Simplified-Chinese:
             Help: '{prefix}&c使用帮助: /la broadcast [公告名称]'
             Not-Found: '{prefix}&c找不到公告: &e{announcement} &c， 请使用 &a/la list &c列出所有可用的公告！'
         List: '{prefix}&a当前可用的公告如下: &c{list}'
+        Switch:
+            Help: '{prefix}&c使用帮助: /la switch [玩家名]'
+            Switch-On: '{prefix}&a成功开启了玩家 &e{player} &a的公告显示'
+            Switch-Off: '{prefix}&a成功关闭了玩家 &e{player} &a的公告显示'
+        Ignore:
+            Help: '{prefix}&c使用帮助: /la ignore [公告名] [玩家名]'
+            Not-Found: '{prefix}&c找不到公告: &e{announcement} &c， 请使用 &a/la list &c列出所有可用的公告！'
+            Ignore-On: '{prefix}&a成功使玩家 &e{player} &a启用公告 &c{announcement} &a的显示。'
+            Ignore-Off: '{prefix}&a成功使玩家 &e{player} &a屏蔽公告 &c{announcement} &a的显示。'
     Updater:
         Link:
             Message: '&d&l[点击查看]'
@@ -33,6 +45,7 @@ Simplified-Chinese:
 Traditional-Chinese:
     No-Permission: '{prefix}&c你沒有這麼做的權限!'
     Repaired-Config-Section: '{prefix}&c插件無法獲取配置文件 &e{config} &c路徑 &7{path}&c, 已通過獲取默認配置文件進行修復.'
+    Player-Not-Exist: '{prefix}&c玩家 &e{player} &c不存在！'
     Command-Messages:
         Unknown-Command: '{prefix}&c未知命令, 使用&6/la help &c查看幫助'
         Help-Command:
@@ -42,6 +55,8 @@ Traditional-Chinese:
         - ' &6/la view [公告名稱] &c查看一個公告的內容'
         - ' &6/la broadcast [公告名稱] &c廣播此公告'
         - ' &6/la list &c列出所有已啟用的公告'
+        - ' &6/la switch [玩家名] &c開啟或關閉玩家的公告顯示'
+        - ' &6/la ignore [公告名] [玩家名] &c開啟或關閉玩家指定的公告的顯示'
         Reload: '{prefix}&a已重載配置文件.'
         View:
             Help: '{prefix}&c使用幫助: /la view [公告名稱]'
@@ -50,6 +65,15 @@ Traditional-Chinese:
             Help: '{prefix}&c使用幫助: /la broadcast [公告名稱]'
             Not-Found: '{prefix}&c找不到公告: &e{announcement} &c， 請使用 &a/la list &c列出所有可用的公告！ '
         List: '{prefix}&a當前可用的公告如下: &c{list}'
+        Switch:
+            Help: '{prefix}&c使用幫助: /la switch [玩家名]'
+            Switch-On: '{prefix}&a成功開啟了玩家 &e{player} &a的公告顯示'
+            Switch-Off: '{prefix}&a成功關閉了玩家 &e{player} &a的公告顯示'
+        Ignore:
+            Help: '{prefix}&c使用幫助: /la ignore [公告名] [玩家名]'
+            Not-Found: '{prefix}&c找不到公告: &e{announcement} &c， 請使用 &a/la list &c列出所有可用的公告！ '
+            Ignore-On: '{prefix}&a成功使玩家 &e{player} &a啟用公告 &c{announcement} &a的顯示。 '
+            Ignore-Off: '{prefix}&a成功使玩家 &e{player} &a屏蔽公告 &c{announcement} &a的顯示。 '
     Updater:
         Link:
             Message: '&d&l[點擊查看]'
@@ -65,6 +89,7 @@ Traditional-Chinese:
 English:
     No-Permission: '{prefix}&cYou don''t have permission to do this!'
     Repaired-Config-Section: '{prefix}&cPlugin cannot obtain the configuration file &e{config} &c path &7{path}&c, which has been fixed by obtaining the default configuration file.'
+    Player-Not-Exist: '{prefix}&cPlayer &e{player}&c does not exist!'
     Command-Messages:
         Unknown-Command: '{prefix}&cUnknown command, Please use &6/la help &cto view command list.'
         Help-Command: 
@@ -74,6 +99,8 @@ English:
         - ' &6/la view [Announcement] &cView the announcement content.'
         - ' &6/la broadcast [Announcement] &cBroadcast this announcement.'
         - ' &6/la list &cList all announcements.'
+        - ' &6/la switch [PlayerName] &cturn on or off the player''s announcement display'
+        - ' &6/la ignore [Announcement] [PlayerName] &cToggles whether a player can receive an announcement.'
         Reload: '{prefix}&aConfiguration files has been reloaded.'
         View:
             Help: '{prefix}&cUsage help: /la view [Announcement]'
@@ -82,6 +109,15 @@ English:
             Help: '{prefix}&cUsage help: /la broadcast [Announcement]'
             Not-Found: '{prefix}&cUnknown announcement name: &e{announcement} &c, Please use &a/la list &cto list all announcements.'
         List: '{prefix}&aThe currently available announcements are as follows: &c{list}'
+        Switch:
+            Help: '{prefix}&cUsage help: /la switch [PlayerName]'
+            Switch-On: '{prefix}&aSuccessfully enabled announcement display for player &e{player} &a.'
+            Switch-Off: '{prefix}&aSuccessfully disabled announcement display for player &e{player} &a.'
+        Ignore:
+            Help: '{prefix}&cUsage help: /la ignore [Announcement] [PlayerName]'
+            Not-Found: '{prefix}&cUnknown announcement name: &e{announcement} &c, Please use &a/la list &cto list all announcements.'
+            Ignore-On: '{prefix}&aSuccessfully enabled announcement &c{announcement} &adisplay for player &e{player} &a.'
+            Ignore-Off: '{prefix}&aSuccessfully enabled announcement &c{announcement} &adisplay for player &e{player} &a.'
     Updater:
         Link:
             Message: '&d&l[ClickHere]'

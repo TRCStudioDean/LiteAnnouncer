@@ -5,10 +5,16 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import net.md_5.bungee.api.CommandSender;
+import net.md_5.bungee.api.ProxyServer;
+import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.plugin.Command;
 import net.md_5.bungee.api.plugin.TabExecutor;
+import net.md_5.bungee.config.Configuration;
+import studio.trc.bungee.liteannouncer.configuration.ConfigurationType;
+import studio.trc.bungee.liteannouncer.configuration.ConfigurationUtil;
 
 import studio.trc.bungee.liteannouncer.util.MessageUtil;
 import studio.trc.bungee.liteannouncer.util.PluginControl;
@@ -84,11 +90,80 @@ public class LiteAnnouncerCommand
                 }
                 Map<String, String> placeholders = new HashMap();
                 List<String> name = new ArrayList();
-                for (Announcement announcement : PluginControl.getAnnouncements()) {
+                PluginControl.getAnnouncements().stream().forEach((announcement) -> {
                     name.add(announcement.getName());
-                }
+                });
                 placeholders.put("{list}", name.toString().substring(1, name.toString().length() - 1));
                 MessageUtil.sendMessage(sender, "Command-Messages.List", placeholders);
+            } else if (args[0].equalsIgnoreCase("switch")) {
+                if (!PluginControl.hasPermission(sender, "Permissions.Commands.Switch")) {
+                    MessageUtil.sendMessage(sender, "No-Permission");
+                    return;
+                }
+                if (args.length < 2) {
+                    MessageUtil.sendMessage(sender, "Command-Messages.Switch.Help");
+                    return;
+                }
+                ProxiedPlayer player = ProxyServer.getInstance().getPlayer(args[1]);
+                Map<String, String> placeholders = new HashMap();
+                if (player == null) {
+                    placeholders.put("{player}", args[1]);
+                    MessageUtil.sendMessage(sender, "Player-Not-Exist", placeholders);
+                    return;
+                }
+                placeholders.put("{player}", player.getName());
+                Configuration data = ConfigurationUtil.getFileConfiguration(ConfigurationType.PLAYER_DATA);
+                List<String> list = data.get("PlayerData." + player.getUniqueId() + ".Ignored-Announcements") != null ? data.getStringList("PlayerData." + player.getUniqueId() + ".Ignored-Announcements") : new ArrayList();
+                data.set("PlayerData." + player.getUniqueId() + ".Name", player.getName());
+                if (list.contains("ALL")) {
+                    list.remove("ALL");
+                    data.set("PlayerData." + player.getUniqueId() + ".Ignored-Announcements", list);
+                    ConfigurationUtil.getConfig(ConfigurationType.PLAYER_DATA).saveConfig();
+                    MessageUtil.sendMessage(sender, "Command-Messages.Switch.Switch-Off", placeholders);
+                } else {
+                    list.add("ALL");
+                    data.set("PlayerData." + player.getUniqueId() + ".Ignored-Announcements", list);
+                    ConfigurationUtil.getConfig(ConfigurationType.PLAYER_DATA).saveConfig();
+                    MessageUtil.sendMessage(sender, "Command-Messages.Switch.Switch-On", placeholders);
+                }
+            } else if (args[0].equalsIgnoreCase("ignore")) {
+                if (!PluginControl.hasPermission(sender, "Permissions.Commands.Ignore")) {
+                    MessageUtil.sendMessage(sender, "No-Permission");
+                    return;
+                }
+                if (args.length < 3) {
+                    MessageUtil.sendMessage(sender, "Command-Messages.Ignore.Help");
+                    return;
+                }
+                ProxiedPlayer player = ProxyServer.getInstance().getPlayer(args[2]);
+                Map<String, String> placeholders = new HashMap();
+                if (player == null) {
+                    placeholders.put("{player}", args[2]);
+                    MessageUtil.sendMessage(sender, "Player-Not-Exist", placeholders);
+                    return;
+                }
+                placeholders.put("{player}", player.getName());
+                Announcement announcement = PluginControl.getAnnouncementsByPriority().stream().filter(announcement_ -> announcement_.getName().equalsIgnoreCase(args[1])).findFirst().orElse(null);
+                if (announcement == null) {
+                    placeholders.put("{announcement}", args[1]);
+                    MessageUtil.sendMessage(sender, "Command-Messages.Ignore.Not-Found", placeholders);
+                    return;
+                }
+                placeholders.put("{announcement}", announcement.getName());
+                Configuration data = ConfigurationUtil.getFileConfiguration(ConfigurationType.PLAYER_DATA);
+                List<String> list = data.get("PlayerData." + player.getUniqueId() + ".Ignored-Announcements") != null ? data.getStringList("PlayerData." + player.getUniqueId() + ".Ignored-Announcements") : new ArrayList();
+                data.set("PlayerData." + player.getUniqueId() + ".Name", player.getName());
+                if (list.contains(announcement.getName())) {
+                    list.remove(announcement.getName());
+                    data.set("PlayerData." + player.getUniqueId() + ".Ignored-Announcements", list);
+                    ConfigurationUtil.getConfig(ConfigurationType.PLAYER_DATA).saveConfig();
+                    MessageUtil.sendMessage(sender, "Command-Messages.Ignore.Ignore-Off", placeholders);
+                } else {
+                    list.add(announcement.getName());
+                    data.set("PlayerData." + player.getUniqueId() + ".Ignored-Announcements", list);
+                    ConfigurationUtil.getConfig(ConfigurationType.PLAYER_DATA).saveConfig();
+                    MessageUtil.sendMessage(sender, "Command-Messages.Ignore.Ignore-On", placeholders);
+                }
             } else {
                 MessageUtil.sendMessage(sender, "Command-Messages.Unknown-Command");
             }
@@ -103,6 +178,15 @@ public class LiteAnnouncerCommand
             }
             if (args[0].equalsIgnoreCase("broadcast") && args.length == 2 && PluginControl.hasPermission(sender, "Permissions.Commands.Broadcast")) {
                 return getAnnouncements(args[1]);
+            }
+            if (args[0].equalsIgnoreCase("switch") && args.length == 2 && PluginControl.hasPermission(sender, "Permissions.Commands.Switch")) {
+                return getTabPlayersName(args, 2);
+            }
+            if (args[0].equalsIgnoreCase("ignore") && args.length == 2 && PluginControl.hasPermission(sender, "Permissions.Commands.Ignore")) {
+                return getAnnouncements(args[1]);
+            }
+            if (args[0].equalsIgnoreCase("ignore") && args.length == 3 && PluginControl.hasPermission(sender, "Permissions.Commands.Ignore")) {
+                return getTabPlayersName(args, 3);
             }
             return getCommands(args[0]);
         } else {
@@ -122,16 +206,26 @@ public class LiteAnnouncerCommand
     }
     
     private List<String> getCommands(String args) {
-        List<String> commands = Arrays.asList("help", "reload", "broadcast",  "view", "list");
+        List<String> commands = Arrays.asList("help", "reload", "broadcast",  "view", "list", "switch", "ignore");
         if (args != null) {
             List<String> names = new ArrayList();
-            for (String command : commands) {
-                if (command.startsWith(args.toLowerCase())) {
-                    names.add(command);
-                }
-            }
+            commands.stream().filter(command -> (command.startsWith(args.toLowerCase()))).forEach(command -> {
+                names.add(command);
+            });
             return names;
         }
         return commands;
+    }
+    
+    private List<String> getTabPlayersName(String[] args, int length) {
+        if (args.length == length) {
+            List<String> onlines = ProxyServer.getInstance().getPlayers().stream().map(player -> player.getName()).collect(Collectors.toList());
+            List<String> names = new ArrayList();
+            onlines.stream().filter(command -> command.toLowerCase().startsWith(args[length - 1].toLowerCase())).forEach(command -> {
+                names.add(command);
+            });
+            return names;
+        }
+        return new ArrayList();
     }
 }

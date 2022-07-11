@@ -19,7 +19,6 @@ public class TitleUtil
     public static Class<?> clientboundSetTitleTextPacket;
     public static Class<?> clientboundSetSubTitleTextPacket;
     public static Class<?> craftChatMessage;
-//    public static Class<?> chatComponentText;
     public static Class<?> interfaceChatBaseComponent;
     public static Class<?> craftPlayer;
     public static Class<?> packetPlayOutTitle;
@@ -36,7 +35,6 @@ public class TitleUtil
                 enumPlayerInfoAction = Class.forName("net.minecraft.server." + nmsVersion + ".PacketPlayOutPlayerInfo$EnumPlayerInfoAction");
             }
             if (nmsVersion.startsWith("v1_17") || nmsVersion.startsWith("v1_18") || nmsVersion.startsWith("v1_19")) {
-//                chatComponentText = Class.forName("net.minecraft.network.chat.ChatComponentText");
                 interfaceChatBaseComponent = Class.forName("net.minecraft.network.chat.IChatBaseComponent");
                 packet = Class.forName("net.minecraft.network.protocol.Packet");
                 clientboundSetTitlesAnimationPacket = Class.forName("net.minecraft.network.protocol.game.ClientboundSetTitlesAnimationPacket");
@@ -46,7 +44,6 @@ public class TitleUtil
             } else if (!nmsVersion.startsWith("v1_7")) {
                 interfaceChatBaseComponent = Class.forName("net.minecraft.server." + nmsVersion + ".IChatBaseComponent");
                 packet = Class.forName("net.minecraft.server." + nmsVersion + ".Packet");
-//                chatComponentText = Class.forName("net.minecraft.server." + nmsVersion + ".ChatComponentText");
                 packetPlayOutTitle = Class.forName("net.minecraft.server." + nmsVersion + ".PacketPlayOutTitle");
                 craftChatMessage = Class.forName("org.bukkit.craftbukkit." + nmsVersion + ".util.CraftChatMessage");
             }

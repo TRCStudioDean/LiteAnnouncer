@@ -42,3 +42,9 @@ Permissions:
         List: 
             Permission: liteannouncer.command.list
             Default: false
+        Switch:
+            Permission: liteannouncer.command.switch
+            Default: false
+        Ignore:
+            Permission: liteannouncer.command.ignore
+            Default: false
