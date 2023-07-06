@@ -119,12 +119,12 @@ public class LiteAnnouncerCommand
                     list.remove("ALL");
                     data.set("PlayerData." + player.getUniqueId() + ".Ignored-Announcements", list);
                     ConfigurationUtil.getConfig(ConfigurationType.PLAYER_DATA).saveConfig();
-                    MessageUtil.sendMessage(sender, "Command-Messages.Switch.Switch-Off", placeholders);
+                    MessageUtil.sendMessage(sender, "Command-Messages.Switch.Switch-On", placeholders);
                 } else {
                     list.add("ALL");
                     data.set("PlayerData." + player.getUniqueId() + ".Ignored-Announcements", list);
                     ConfigurationUtil.getConfig(ConfigurationType.PLAYER_DATA).saveConfig();
-                    MessageUtil.sendMessage(sender, "Command-Messages.Switch.Switch-On", placeholders);
+                    MessageUtil.sendMessage(sender, "Command-Messages.Switch.Switch-Off", placeholders);
                 }
             } else if (args[0].equalsIgnoreCase("ignore")) {
                 if (!PluginControl.hasPermission(sender, "Permissions.Commands.Ignore")) {
@@ -157,12 +157,12 @@ public class LiteAnnouncerCommand
                     list.remove(announcement.getName());
                     data.set("PlayerData." + player.getUniqueId() + ".Ignored-Announcements", list);
                     ConfigurationUtil.getConfig(ConfigurationType.PLAYER_DATA).saveConfig();
-                    MessageUtil.sendMessage(sender, "Command-Messages.Ignore.Ignore-Off", placeholders);
+                    MessageUtil.sendMessage(sender, "Command-Messages.Ignore.Ignore-On", placeholders);
                 } else {
                     list.add(announcement.getName());
                     data.set("PlayerData." + player.getUniqueId() + ".Ignored-Announcements", list);
                     ConfigurationUtil.getConfig(ConfigurationType.PLAYER_DATA).saveConfig();
-                    MessageUtil.sendMessage(sender, "Command-Messages.Ignore.Ignore-On", placeholders);
+                    MessageUtil.sendMessage(sender, "Command-Messages.Ignore.Ignore-Off", placeholders);
                 }
             } else {
                 MessageUtil.sendMessage(sender, "Command-Messages.Unknown-Command");

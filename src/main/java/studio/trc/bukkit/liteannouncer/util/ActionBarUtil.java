@@ -25,7 +25,7 @@ public class ActionBarUtil
     public static void initialize() {
         String nmsVersion = PluginControl.getNMSVersion();
         try {
-            if (nmsVersion.startsWith("v1_17") || nmsVersion.startsWith("v1_18") || nmsVersion.startsWith("v1_19")) {
+            if (nmsVersion.startsWith("v1_17") || nmsVersion.startsWith("v1_18") || nmsVersion.startsWith("v1_19") || nmsVersion.startsWith("v1_20")) {
                 chatMessageType = Class.forName("net.minecraft.network.chat.ChatMessageType");
                 interfaceChatBaseComponent = Class.forName("net.minecraft.network.chat.IChatBaseComponent");
                 packet = Class.forName("net.minecraft.network.protocol.Packet");
