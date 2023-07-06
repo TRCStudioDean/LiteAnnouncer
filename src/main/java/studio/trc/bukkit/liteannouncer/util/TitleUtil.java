@@ -34,7 +34,7 @@ public class TitleUtil
                 enumTitleAction = Class.forName("net.minecraft.server." + nmsVersion + ".PacketPlayOutTitle$EnumTitleAction");
                 enumPlayerInfoAction = Class.forName("net.minecraft.server." + nmsVersion + ".PacketPlayOutPlayerInfo$EnumPlayerInfoAction");
             }
-            if (nmsVersion.startsWith("v1_17") || nmsVersion.startsWith("v1_18") || nmsVersion.startsWith("v1_19")) {
+            if (nmsVersion.startsWith("v1_17") || nmsVersion.startsWith("v1_18") || nmsVersion.startsWith("v1_19") || nmsVersion.startsWith("v1_20")) {
                 interfaceChatBaseComponent = Class.forName("net.minecraft.network.chat.IChatBaseComponent");
                 packet = Class.forName("net.minecraft.network.protocol.Packet");
                 clientboundSetTitlesAnimationPacket = Class.forName("net.minecraft.network.protocol.game.ClientboundSetTitlesAnimationPacket");
@@ -59,7 +59,7 @@ public class TitleUtil
         title = MessageUtil.toColor(MessageUtil.replacePlaceholders(player, title, new HashMap()));
         subTitle = MessageUtil.toColor(MessageUtil.replacePlaceholders(player, subTitle, new HashMap()));
         try {
-            if (nmsVersion.startsWith("v1_17") || nmsVersion.startsWith("v1_18") || nmsVersion.startsWith("v1_19")) {
+            if (nmsVersion.startsWith("v1_17") || nmsVersion.startsWith("v1_18") || nmsVersion.startsWith("v1_19") || nmsVersion.startsWith("v1_20")) {
                 Object animationPacket = clientboundSetTitlesAnimationPacket.getConstructor(int.class, int.class, int.class).newInstance((int) (fadein * 20), (int) (stay * 20), (int) (fadeout * 20));
                 sendPacket(player, animationPacket);
                 if (title != null) {
@@ -76,7 +76,7 @@ public class TitleUtil
                 Object animationPacket = packetPlayOutTitle.getConstructor(int.class, int.class, int.class).newInstance((int) (fadein * 20), (int) (stay * 20), (int) (fadeout * 20));
                 sendPacket(player, animationPacket);
                 if (title != null) {
-                    Object titleMessagePacket = packetPlayOutTitle.getConstructor(enumTitleAction, interfaceChatBaseComponent).newInstance(titleEnumPacket, Array.get(craftChatMessage.getMethod("fromString", String.class).invoke(null, subTitle), 0));
+                    Object titleMessagePacket = packetPlayOutTitle.getConstructor(enumTitleAction, interfaceChatBaseComponent).newInstance(titleEnumPacket, Array.get(craftChatMessage.getMethod("fromString", String.class).invoke(null, title), 0));
                     sendPacket(player, titleMessagePacket);
                 }
                 if (subTitle != null) {
