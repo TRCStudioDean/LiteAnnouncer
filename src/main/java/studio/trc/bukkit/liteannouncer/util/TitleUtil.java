@@ -56,8 +56,8 @@ public class TitleUtil
     public static void sendTitle(Player player, String title, String subTitle, double fadein, double stay, double fadeout) {
         String nmsVersion = PluginControl.getNMSVersion();
         if (nmsVersion.startsWith("v1_7")) return;
-        title = MessageUtil.toColor(MessageUtil.replacePlaceholders(player, title, new HashMap()));
-        subTitle = MessageUtil.toColor(MessageUtil.replacePlaceholders(player, subTitle, new HashMap()));
+        title = MessageUtil.replacePlaceholders(player, title, new HashMap());
+        subTitle = MessageUtil.replacePlaceholders(player, subTitle, new HashMap());
         try {
             if (nmsVersion.startsWith("v1_17") || nmsVersion.startsWith("v1_18") || nmsVersion.startsWith("v1_19") || nmsVersion.startsWith("v1_20")) {
                 Object animationPacket = clientboundSetTitlesAnimationPacket.getConstructor(int.class, int.class, int.class).newInstance((int) (fadein * 20), (int) (stay * 20), (int) (fadeout * 20));

@@ -28,7 +28,7 @@ public class LiteAnnouncerProperties
     public static void sendOperationMessage(String path) {
         CommandSender sender = Bukkit.getConsoleSender();
         if (propertiesFile.containsKey(path)) {
-            sender.sendMessage(MessageUtil.toColor(propertiesFile.getProperty(path)));
+            MessageUtil.sendMessage(sender, propertiesFile.getProperty(path));
         }
     }
     
@@ -36,7 +36,7 @@ public class LiteAnnouncerProperties
         CommandSender sender = Bukkit.getConsoleSender();
         if (propertiesFile.containsKey(path)) {
             String message = propertiesFile.getProperty(path);
-            sender.sendMessage(MessageUtil.toColor(MessageUtil.replacePlaceholders(sender, message, placeholders)));
+            MessageUtil.sendMessage(sender, message, placeholders);
         }
     }
 }

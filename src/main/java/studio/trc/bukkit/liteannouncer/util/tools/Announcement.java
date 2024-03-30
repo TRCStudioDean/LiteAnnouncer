@@ -1,6 +1,7 @@
 package studio.trc.bukkit.liteannouncer.util.tools;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -61,7 +62,7 @@ public class Announcement
     }
     
     public void view(CommandSender viewer) {
-        Map<String, BaseComponent> baseComponents = new HashMap();
+        Map<String, BaseComponent> baseComponents = new LinkedHashMap();
         if (viewer instanceof Player) {
             messages.stream().forEach(message -> {
                 PluginControl.getJsonComponents().stream().forEach(jsonComponent -> {
@@ -74,7 +75,7 @@ public class Announcement
                     }
                     baseComponents.put(jsonComponent.getPlaceholder(), bc);
                 });
-                MessageUtil.sendJsonMessage(viewer, message, baseComponents);
+                MessageUtil.sendJSONMessage(viewer, MessageUtil.createJsonMessage(viewer, message, baseComponents));
             });
             if (!titlesOfBroadcast.isEmpty()) {
                 Thread thread = new Thread(() -> {
@@ -111,7 +112,7 @@ public class Announcement
                 PluginControl.getJsonComponents().stream().forEach(jsonComponent -> {
                     baseComponents.put(jsonComponent.getPlaceholder(), jsonComponent.getComponent());
                 });
-                MessageUtil.sendJsonMessage(viewer, message, baseComponents);
+                MessageUtil.sendJSONMessage(viewer, MessageUtil.createJsonMessage(viewer, message, baseComponents));
             });
         }
     }
@@ -131,7 +132,7 @@ public class Announcement
                     }
                     baseComponents.put(jsonComponent.getPlaceholder(), bc);
                 });
-                MessageUtil.sendJsonMessage(player, message, baseComponents);
+                MessageUtil.sendJSONMessage(player, MessageUtil.createJsonMessage(player, message, baseComponents));
             });
         });
         CommandSender console = Bukkit.getConsoleSender();
@@ -141,7 +142,7 @@ public class Announcement
                 PluginControl.getJsonComponents().stream().forEach(jsonComponent -> {
                     baseComponents.put(jsonComponent.getPlaceholder(), jsonComponent.getComponent());
                 });
-                MessageUtil.sendJsonMessage(console, message, baseComponents);
+                MessageUtil.sendJSONMessage(console, MessageUtil.createJsonMessage(console, message, baseComponents));
             }
         });
         if (!titlesOfBroadcast.isEmpty() && !Bukkit.getOnlinePlayers().isEmpty()) {

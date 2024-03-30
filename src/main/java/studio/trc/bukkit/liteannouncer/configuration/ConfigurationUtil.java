@@ -42,7 +42,7 @@ public class ConfigurationUtil
         } catch (IOException | InvalidConfigurationException ex) {
             File oldFile = new File("plugins/LiteAnnouncer/" + fileType.getFileName() + ".old");
             File file = new File("plugins/LiteAnnouncer/" + fileType.getFileName());
-            Map<String, String> placeholders = new HashMap();
+            Map<String, String> placeholders = MessageUtil.getDefaultPlaceholders();
             placeholders.put("{file}", fileType.getFileName());
             LiteAnnouncerProperties.sendOperationMessage("ConfigurationLoadingError", placeholders);
             if (oldFile.exists()) {
