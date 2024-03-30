@@ -50,7 +50,7 @@ public class ActionBarUtil
         if (PluginControl.getNMSVersion().startsWith("v1_7")) return;
         if (text == null) return;
         String nmsVersion = PluginControl.getNMSVersion();
-        text = MessageUtil.toColor(MessageUtil.replacePlaceholders(player, text, new HashMap()));
+        text = MessageUtil.replacePlaceholders(player, text, new HashMap());
         try {
             Object actionbar;
             // 1.8 - 1.11.2

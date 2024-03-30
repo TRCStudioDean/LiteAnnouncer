@@ -6,6 +6,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import lombok.Getter;
+import lombok.Setter;
 
 import me.clip.placeholderapi.PlaceholderAPI;
 
@@ -17,84 +21,203 @@ import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import studio.trc.bukkit.liteannouncer.Main;
+import studio.trc.bukkit.liteannouncer.configuration.Configuration;
 import studio.trc.bukkit.liteannouncer.configuration.ConfigurationType;
 import studio.trc.bukkit.liteannouncer.configuration.ConfigurationUtil;
 
 public class MessageUtil
 {
-    /**
-     * Send message to command sender.
-     * @param sender Command sender.
-     * @param path Messages.yml's path
-     */
-    public static void sendMessage(CommandSender sender, String path) {
-        if (sender == null) return;
-        List<String> messages = ConfigurationUtil.getConfig(ConfigurationType.MESSAGES).getStringList(getLanguage() + "." + path);
-        if (messages.isEmpty() && !ConfigurationUtil.getConfig(ConfigurationType.MESSAGES).getString(getLanguage() + "." + path).equals("[]")) {
-            sender.sendMessage(toColor(replacePlaceholders(sender, ConfigurationUtil.getConfig(ConfigurationType.MESSAGES).getString(getLanguage() + "." + path), new HashMap())));
-        } else {
-            for (String message : messages) {
-                sender.sendMessage(toColor(replacePlaceholders(sender, message, new HashMap())));
-            }
-        }
+    private static final Map<String, String> defaultPlaceholders = new HashMap();
+    private static final Map<String, BaseComponent> defaultJsonComponents = new HashMap();
+    private static final Pattern hexColorPattern = Pattern.compile("#[a-fA-F0-9]{6}");
+    
+    @Getter
+    @Setter
+    private static boolean enabledPAPI = false;
+    
+    public static void loadPlaceholders() {
+        defaultPlaceholders.clear();
+        defaultPlaceholders.put("{plugin_version}", Main.getInstance().getDescription().getVersion());
+        defaultPlaceholders.put("{language}", getLanguage());
+        defaultPlaceholders.put("{prefix}", getPrefix());
     }
     
     /**
      * Send message to command sender.
      * @param sender Command sender.
-     * @param path Messages.yml's path
-     * @param placeholders If the text contains a placeholder,
-     *                      The placeholder will be replaced with the specified text.
+     * @param message Message text.
      */
-    public static void sendMessage(CommandSender sender, String path, Map<String, String> placeholders) {
+    public static void sendMessage(CommandSender sender, String message) {
+        sendMessage(sender, message, defaultPlaceholders, defaultJsonComponents);
+    }
+    
+    /**
+     * Send message to command sender.
+     * @param sender Command sender.
+     * @param message Message text.
+     * @param placeholders String placeholders.
+     */
+    public static void sendMessage(CommandSender sender, String message, Map<String, String> placeholders) {
+        sendMessage(sender, message, placeholders, defaultJsonComponents);
+    }
+    
+    /**
+     * Send message to command sender.
+     * @param sender Command sender.
+     * @param message Message text.
+     * @param placeholders String placeholders.
+     * @param jsonComponents JSON Messages.
+     */
+    public static void sendMessage(CommandSender sender, String message, Map<String, String> placeholders, Map<String, BaseComponent> jsonComponents) {
         if (sender == null) return;
-        List<String> messages = ConfigurationUtil.getConfig(ConfigurationType.MESSAGES).getStringList(getLanguage() + "." + path);
-        if (messages.isEmpty() && !ConfigurationUtil.getConfig(ConfigurationType.MESSAGES).getString(getLanguage() + "." + path).equals("[]")) {
-            sender.sendMessage(toColor(replacePlaceholders(sender, ConfigurationUtil.getConfig(ConfigurationType.MESSAGES).getString(getLanguage() + "." + path), placeholders)));
+        message = replacePlaceholders(sender, message, placeholders);
+        if (jsonComponents.isEmpty()) {
+            sender.sendMessage(message);
         } else {
-            for (String message : messages) {
-                sender.sendMessage(toColor(replacePlaceholders(sender, message, placeholders)));
-            }
+            sendJSONMessage(sender, createJsonMessage(sender, message, jsonComponents));
         }
     }
     
     /**
-     * Send Json message to player or console
-     * @param sender Receiver.
-     * @param message Target text.
-     * @param baseComponents Json components.
+     * Send message to command sender.
+     * @param sender Command sender.
+     * @param messages String messages.
      */
-    public static void sendJsonMessage(CommandSender sender, String message, Map<String, BaseComponent> baseComponents) {
-        List<BaseComponent> components = createJsonMessage(sender, prefix(message), baseComponents);
-        if (sender instanceof Player) {
-            ((Player) sender).spigot().sendMessage(components.toArray(new BaseComponent[0]));
+    public static void sendMessage(CommandSender sender, List<String> messages) {
+        messages.stream().forEach(rawMessage -> {
+            sendMessage(sender, rawMessage);
+        });
+    }
+    
+    /**
+     * Send message to command sender.
+     * @param sender Command sender.
+     * @param messages String messages.
+     * @param placeholders String placeholders.
+     */
+    public static void sendMessage(CommandSender sender, List<String> messages, Map<String, String> placeholders) {
+        messages.stream().forEach(rawMessage -> {
+            sendMessage(sender, rawMessage, placeholders);
+        });
+    }
+    
+    /**
+     * Send message to command sender.
+     * @param sender Command sender.
+     * @param messages String messages.
+     * @param placeholders String placeholders.
+     * @param jsonComponents JSON messages.
+     */
+    public static void sendMessage(CommandSender sender, List<String> messages, Map<String, String> placeholders, Map<String, BaseComponent> jsonComponents) {
+        messages.stream().forEach(rawMessage -> {
+            sendMessage(sender, rawMessage, placeholders, jsonComponents);
+        });
+    }
+    
+    /**
+     * Send message to command sender.
+     * @param sender Command sender.
+     * @param configuration config name.
+     * @param configPath config path.
+     */
+    public static void sendMessage(CommandSender sender, Configuration configuration, String configPath) {
+        sendMessage(sender, configuration, configPath, defaultPlaceholders, defaultJsonComponents);
+    }
+    
+    /**
+     * Send message to command sender.
+     * @param sender Command sender.
+     * @param configuration config name.
+     * @param configPath config path.
+     * @param placeholders String placeholders.
+     */
+    public static void sendMessage(CommandSender sender, Configuration configuration, String configPath, Map<String, String> placeholders) {
+        sendMessage(sender, configuration, configPath, placeholders, defaultJsonComponents);
+    }
+    
+    /**
+     * Send message to command sender.
+     * @param sender Command sender.
+     * @param configuration config name.
+     * @param configPath config path.
+     * @param placeholders String placeholders.
+     * @param jsonComponents JSON messages.
+     */
+    public static void sendMessage(CommandSender sender, Configuration configuration, String configPath, Map<String, String> placeholders, Map<String, BaseComponent> jsonComponents) {
+        List<String> messages = configuration.getStringList(getLanguage() + "." + configPath);
+        if (messages.isEmpty() && !ConfigurationUtil.getConfig(ConfigurationType.MESSAGES).getString(getLanguage() + "." + configPath).equals("[]")) {
+            sendMessage(sender, configuration.getString(getLanguage() + "." + configPath), placeholders, jsonComponents);
         } else {
-            StringBuilder sb = new StringBuilder();
-            for (BaseComponent compoents : components) {
-                sb.append(compoents.toPlainText());
-            }
-            sender.sendMessage(toColor(sb.toString()));
+            sendMessage(sender, messages, placeholders, jsonComponents);
         }
     }
     
     /**
-     * Send Json message to player or console
-     * @param sender Receiver.
-     * @param message Target text.
-     * @param baseComponents Json components.
-     * @param placeholders Replace placeholders.
+     * Send json message to command sender.
+     * @param sender Command sender.
+     * @param components JSON components
      */
-    public static void sendJsonMessage(CommandSender sender, String message, Map<String, BaseComponent> baseComponents, Map<String, String> placeholders) {
-        List<BaseComponent> components = createJsonMessage(sender, replacePlaceholders(sender, message, placeholders), baseComponents);
+    public static void sendJSONMessage(CommandSender sender, List<BaseComponent> components) {
         if (sender instanceof Player) {
-            ((Player) sender).spigot().sendMessage(components.toArray(new BaseComponent[0]));
+            ((Player) sender).spigot().sendMessage(components.toArray(new BaseComponent[] {}));
         } else {
-            StringBuilder sb = new StringBuilder();
-            for (BaseComponent compoents : components) {
-                sb.append(compoents.toPlainText());
-            }
-            sender.sendMessage(toColor(sb.toString()));
+            StringBuilder builder = new StringBuilder();
+            components.stream().map(component -> component.toPlainText()).forEach(message -> {
+                builder.append(message);
+            });
+            sender.sendMessage(builder.toString());
         }
+    }
+    
+    /**
+     * Send command message to command sender.
+     * @param sender Command sender.
+     * @param configPath config path.
+     */
+    public static void sendCommandMessage(CommandSender sender, String configPath) {
+        sendMessage(sender, ConfigurationUtil.getConfig(ConfigurationType.MESSAGES), "Command-Messages." + configPath, defaultPlaceholders, defaultJsonComponents);
+    }
+    
+    /**
+     * Send command message to command sender.
+     * @param sender Command sender.
+     * @param configPath config path.
+     * @param placeholders String placeholders.
+     */
+    public static void sendCommandMessage(CommandSender sender, String configPath, Map<String, String> placeholders) {
+        sendMessage(sender, ConfigurationUtil.getConfig(ConfigurationType.MESSAGES), "Command-Messages." + configPath, placeholders, defaultJsonComponents);
+    }
+    
+    /**
+     * Send command message to command sender.
+     * @param sender Command sender.
+     * @param configPath config path.
+     * @param placeholders String placeholders.
+     * @param jsonComponents JSON messages.
+     */
+    public static void sendCommandMessage(CommandSender sender, String configPath, Map<String, String> placeholders, Map<String, BaseComponent> jsonComponents) {
+        sendMessage(sender, ConfigurationUtil.getConfig(ConfigurationType.MESSAGES), "Command-Messages." + configPath, placeholders, jsonComponents);
+    }
+    
+    /**
+     * Replace all placeholders to the corresponding text.
+     * @param message Target text.
+     * @param placeholders Placeholders.
+     * @return 
+     */
+    public static String replacePlaceholders(String message, Map<String, String> placeholders) {
+        if (message == null) return null;
+        List<TextParagraph> splitedTexts = splitIntoParagraphs(message, placeholders);
+        StringBuilder string = new StringBuilder();
+        splitedTexts.stream().forEach(paragraph -> {
+            if (paragraph.isPlaceholder()) {
+                string.append(paragraph.getText());
+            } else {
+                string.append(message.substring(paragraph.startsWith, paragraph.endsWith).replace("/n", "\n"));
+            }
+        });
+        return toColor(string.toString());
     }
     
     /**
@@ -102,21 +225,20 @@ public class MessageUtil
      * @param sender Use for hook PlaceholderAPI
      * @param message Target text.
      * @param placeholders Placeholders.
-     *                      Defaultly come with {prefix} for plugin's prefix.
      * @return 
      */
     public static String replacePlaceholders(CommandSender sender, String message, Map<String, String> placeholders) {
-        placeholders.put("{prefix}", PluginControl.getPrefix());
+        if (message == null) return null;
         List<TextParagraph> splitedTexts = splitIntoParagraphs(message, placeholders);
         StringBuilder string = new StringBuilder();
-        for (TextParagraph paragraph : splitedTexts) {
+        splitedTexts.stream().forEach(paragraph -> {
             if (paragraph.isPlaceholder()) {
                 string.append(paragraph.getText());
             } else {
-                string.append(toPlaceholderAPIResult(message.substring(paragraph.start(), paragraph.end()), sender).replace("/n", "\n"));
+                string.append(toPlaceholderAPIResult(message.substring(paragraph.startsWith, paragraph.endsWith), sender).replace("/n", "\n"));
             }
-        }
-        return string.toString();
+        });
+        return toColor(string.toString());
     }
     
     /**
@@ -129,40 +251,27 @@ public class MessageUtil
     public static List<BaseComponent> createJsonMessage(CommandSender sender, String message, Map<String, BaseComponent> baseComponents) {
         List<TextParagraph> splitedTexts = splitIntoComponentParagraphs(message, baseComponents);
         List<BaseComponent> components = new LinkedList();
-        for (TextParagraph paragraph : splitedTexts) {
+        splitedTexts.stream().forEach(paragraph -> {
             if (paragraph.isPlaceholder()) {
                 components.add(paragraph.getComponent());
             } else {
-                components.add(new TextComponent(toColor(toPlaceholderAPIResult(message.substring(paragraph.start(), paragraph.end()), sender).replace("/n", "\n"))));
+                components.add(new TextComponent(toColor(toPlaceholderAPIResult(message.substring(paragraph.startsWith, paragraph.endsWith), sender).replace("/n", "\n"))));
             }
-        }
+        });
         return components;
     }
     
-    /**
-     * Split placeholders at text into paragraphs.
-     * 
-     * Example: 
-     *     Text: "Today is {year}/{month}/{day}."
-     *     Placeholders: "{year}"="2021", "{month}"="7", "{day}"="1"
-     *     ------->
-     *     "[Today is ], [2021], [/], [7], [/], [1], [.]" as array instance.
-     * 
-     * @param message Target text.
-     * @param placeholders Placeholders.
-     * @return 
-     */
     public static List<TextParagraph> splitIntoParagraphs(String message, Map<String, String> placeholders) {
         List<TextParagraph> splitedTexts = new LinkedList();
         splitedTexts.add(new TextParagraph(0, message.length(), message));
-        for (String placeholder : placeholders.keySet()) {
+        placeholders.keySet().stream().filter(placeholder -> placeholder != null).map(placeholder -> {
             List<TextParagraph> newArray = new ArrayList();
-            for (TextParagraph textParagraphs : splitedTexts) {
+            splitedTexts.stream().forEach(textParagraphs -> {
                 String message_lowerCase = textParagraphs.getText().toLowerCase();
                 String placeholder_lowerCase = placeholder.toLowerCase();
                 if (message_lowerCase.contains(placeholder_lowerCase)) {
                     String[] splitText = message_lowerCase.split(escape(placeholder_lowerCase), -1);
-                    int last = textParagraphs.start();
+                    int last = textParagraphs.startsWith;
                     for (String paragraph : splitText) {
                         int next = last + paragraph.length();
                         if (last != next) {
@@ -170,7 +279,7 @@ public class MessageUtil
                             last = last + paragraph.length();
                             newArray.add(subParagraph);
                         }
-                        if (last < textParagraphs.end()) {
+                        if (last < textParagraphs.endsWith) {
                             TextParagraph insertPlaceholder = new TextParagraph(last, last + placeholder.length(), placeholders.get(placeholder), placeholder);
                             last = last + placeholder.length();
                             newArray.add(insertPlaceholder);
@@ -179,37 +288,39 @@ public class MessageUtil
                 } else {
                     newArray.add(textParagraphs);
                 }
-            }
+            });
+            return newArray;
+        }).forEach(newArray -> {
             splitedTexts.clear();
             splitedTexts.addAll(newArray);
-        }
+        });
         return splitedTexts;
     }
     
     /**
-     * Split placeholders at text components into paragraphs.
+     * Split placeholders at text into paragraphs.
      * 
      * Example: 
-     *     Text: "Today is {year}/{month}/{day}."
-     *     Placeholders: "{year}"="2021", "{month}"="7", "{day}"="1"
+     *     Text: "This plugin was completed in {year}/{month}/{day}."
+     *     Placeholders: "{year}"="2019", "{month}"="11", "{day}"="15"
      *     ------->
-     *     "[Today is ], [2021], [/], [7], [/], [1], [.]" as array instance.
+     *     "[This plugin was completed in ], [2019], [/], [11], [/], [15], [.]" as array instance.
      * 
      * @param message Target text.
-     * @param baseComponents Json components placeholders.
+     * @param baseComponents JSON components.
      * @return 
      */
     public static List<TextParagraph> splitIntoComponentParagraphs(String message, Map<String, BaseComponent> baseComponents) {
         List<TextParagraph> splitedTexts = new LinkedList();
         splitedTexts.add(new TextParagraph(0, message.length(), new TextComponent(message)));
-        for (String placeholder : baseComponents.keySet()) {
+        baseComponents.keySet().stream().filter(placeholder -> placeholder != null).map(placeholder -> {
             List<TextParagraph> newArray = new ArrayList();
-            for (TextParagraph textParagraphs : splitedTexts) {
+            splitedTexts.stream().forEach(textParagraphs -> {
                 String message_lowerCase = textParagraphs.getComponent().toPlainText().toLowerCase();
                 String placeholder_lowerCase = placeholder.toLowerCase();
                 if (message_lowerCase.contains(placeholder_lowerCase)) {
-                    String[] splitText = message_lowerCase.split(placeholder_lowerCase, -1);
-                    int last = textParagraphs.start();
+                    String[] splitText = message_lowerCase.split(escape(placeholder_lowerCase), -1);
+                    int last = textParagraphs.startsWith;
                     for (String paragraph : splitText) {
                         int next = last + paragraph.length();
                         if (last != next) {
@@ -217,7 +328,7 @@ public class MessageUtil
                             last = last + paragraph.length();
                             newArray.add(subParagraph);
                         }
-                        if (last < textParagraphs.end()) {
+                        if (last < textParagraphs.endsWith) {
                             TextParagraph insertComponent = new TextParagraph(last, last + placeholder.length(), baseComponents.get(placeholder), placeholder);
                             last = last + placeholder.length();
                             newArray.add(insertComponent);
@@ -226,10 +337,12 @@ public class MessageUtil
                 } else {
                     newArray.add(textParagraphs);
                 }
-            }
+            });
+            return newArray;
+        }).forEach(newArray -> {
             splitedTexts.clear();
             splitedTexts.addAll(newArray);
-        }
+        });
         return splitedTexts;
     }
     
@@ -252,8 +365,28 @@ public class MessageUtil
     public static String getLanguage() {
         return ConfigurationUtil.getConfig(ConfigurationType.CONFIG).getString("Language");
     }
+
+    public static String getPrefix() {
+        return MessageUtil.toColor(ConfigurationUtil.getConfig(ConfigurationType.CONFIG).getString("Prefix"));
+    }
+    
+    public static Map<String, String> getDefaultPlaceholders() {
+        return new HashMap(defaultPlaceholders);
+    }
     
     public static String toColor(String text) {
+        try {
+            String nmsVersion = PluginControl.getNMSVersion() != null ? PluginControl.getNMSVersion() : Bukkit.getServer().getClass().getPackage().getName().split("\\.")[3];
+            if (!nmsVersion.startsWith("v1_7") && !nmsVersion.startsWith("v1_8") && !nmsVersion.startsWith("v1_9") && !nmsVersion.startsWith("v1_10") &&
+                !nmsVersion.startsWith("v1_11") && !nmsVersion.startsWith("v1_12") && !nmsVersion.startsWith("v1_13") && !nmsVersion.startsWith("v1_14") && !nmsVersion.startsWith("v1_15")) {
+                Matcher matcher = hexColorPattern.matcher(text);
+                while (matcher.find()) {
+                    String color = text.substring(matcher.start(), matcher.end());
+                    text = text.replace(color, net.md_5.bungee.api.ChatColor.of(color).toString());
+                    matcher = hexColorPattern.matcher(text);
+                }
+            }
+        } catch (Throwable t) {}
         return ChatColor.translateAlternateColorCodes('&', text);
     }
     

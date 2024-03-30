@@ -6,14 +6,14 @@ import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.HoverEvent;
 
-public class JsonComponent
+public class JSONComponent
 {
     @Getter
     private final String placeholder;
     @Getter
     private final BaseComponent component;
     
-    public JsonComponent(String placeholder, BaseComponent component) {
+    public JSONComponent(String placeholder, BaseComponent component) {
         this.placeholder = placeholder;
         this.component = component;
     }

@@ -6,6 +6,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.CommandSender;
@@ -19,6 +21,8 @@ import studio.trc.bungee.liteannouncer.configuration.ConfigurationUtil;
 
 public class MessageUtil
 {
+    private static final Pattern hexColorPattern = Pattern.compile("#[a-fA-F0-9]{6}");
+    
     /**
      * Send message to command sender.
      * @param sender Command sender.
@@ -247,6 +251,14 @@ public class MessageUtil
     }
     
     public static String toColor(String text) {
+        try {
+            Matcher matcher = hexColorPattern.matcher(text);
+            while (matcher.find()) {
+                String color = text.substring(matcher.start(), matcher.end());
+                text = text.replace(color, net.md_5.bungee.api.ChatColor.of(color).toString());
+                matcher = hexColorPattern.matcher(text);
+            }
+        } catch (Throwable t) {}
         return ChatColor.translateAlternateColorCodes('&', text);
     }
     

@@ -20,7 +20,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 import studio.trc.bukkit.liteannouncer.Main;
 import studio.trc.bukkit.liteannouncer.util.tools.Announcement;
-import studio.trc.bukkit.liteannouncer.util.tools.JsonComponent;
+import studio.trc.bukkit.liteannouncer.util.tools.JSONComponent;
 import studio.trc.bukkit.liteannouncer.async.AnnouncerThread;
 import studio.trc.bukkit.liteannouncer.configuration.Configuration;
 import studio.trc.bukkit.liteannouncer.configuration.ConfigurationType;
@@ -32,12 +32,8 @@ public class PluginControl
 {
     private static AnnouncerThread thread = null;
     private static final List<Announcement> cacheAnnouncement = new ArrayList();
-    private static final List<JsonComponent> cacheJsonComponent = new ArrayList();
+    private static final List<JSONComponent> cacheJSONComponent = new ArrayList();
     private static final String nmsVersion = Bukkit.getServer().getClass().getPackage().getName().split("\\.")[3];
-    
-    public static String getPrefix() {
-        return MessageUtil.toColor(ConfigurationUtil.getConfig(ConfigurationType.CONFIG).getString("Prefix"));
-    }
     
     public static String getNMSVersion() {
         return nmsVersion;
@@ -70,18 +66,19 @@ public class PluginControl
     
     public static void reload() {
         ConfigurationUtil.reloadConfig();
+        MessageUtil.loadPlaceholders();
         
         if (usePlaceholderAPI()) {
             if (Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")) {
-                LiteAnnouncerProperties.sendOperationMessage("FindThePlaceholderAPI", new HashMap());
+                LiteAnnouncerProperties.sendOperationMessage("FindThePlaceholderAPI");
             } else {
                 ConfigurationUtil.getConfig(ConfigurationType.CONFIG).set("Use-PlaceholderAPI", false);
-                LiteAnnouncerProperties.sendOperationMessage("PlaceholderAPINotFound", new HashMap());
+                LiteAnnouncerProperties.sendOperationMessage("PlaceholderAPINotFound");
             }
         }
         
         reloadAnnouncements();
-        reloadJsonComponents();
+        reloadJSONComponents();
         ActionBarUtil.initialize();
         TitleUtil.initialize();
         
@@ -94,18 +91,18 @@ public class PluginControl
             public void run() {
                 if (thread != null && thread.isAlive()) {
                     thread.isRunning = false;
-                    LiteAnnouncerProperties.sendOperationMessage("AnnouncerWorkEnds", new HashMap());
+                    LiteAnnouncerProperties.sendOperationMessage("AnnouncerWorkEnds");
                     thread = new AnnouncerThread();
                     thread.start();
                     thread.isRunning = true;
-                    Map<String, String> placeholders = new HashMap();
+                    Map<String, String> placeholders = MessageUtil.getDefaultPlaceholders();
                     placeholders.put("{number}", String.valueOf(getAnnouncementsByPriority().size()));
                     LiteAnnouncerProperties.sendOperationMessage("AnnouncerWorkBegins", placeholders);
                 } else {
                     thread = new AnnouncerThread();
                     thread.isRunning = true;
                     thread.start();
-                    Map<String, String> placeholders = new HashMap();
+                    Map<String, String> placeholders = MessageUtil.getDefaultPlaceholders();
                     placeholders.put("{number}", String.valueOf(getAnnouncementsByPriority().size()));
                     LiteAnnouncerProperties.sendOperationMessage("AnnouncerWorkBegins", placeholders);
                 }
@@ -116,7 +113,7 @@ public class PluginControl
     public static void stopAnnouncer() {
         if (thread != null && thread.isAlive()) {
             thread.isRunning = false;
-            LiteAnnouncerProperties.sendOperationMessage("AnnouncerWorkEnds", new HashMap());
+            LiteAnnouncerProperties.sendOperationMessage("AnnouncerWorkEnds");
         }
     }
     
@@ -142,7 +139,7 @@ public class PluginControl
                             String subTitle = config.getString("Announcements." + path + ".Titles.Titles-Setting." + section + ".Sub-Title");
                             titles.put(section, new Title(fadein, stay, fadeout, titleDelay, title, subTitle));
                         } catch (Exception ex) {
-                            Map<String, String> placeholders = new HashMap();
+                            Map<String, String> placeholders = MessageUtil.getDefaultPlaceholders();
                             placeholders.put("{exception}", ex.getLocalizedMessage() != null ? ex.getLocalizedMessage() : "null");
                             placeholders.put("{title}", section);
                             LiteAnnouncerProperties.sendOperationMessage("LoadingTitleFailed", placeholders);
@@ -168,7 +165,7 @@ public class PluginControl
                             }
                             actionbars.add(new ActionBar(actionbar, actionbarDelay));
                         } catch (Exception ex) {
-                            Map<String, String> placeholders = new HashMap();
+                            Map<String, String> placeholders = MessageUtil.getDefaultPlaceholders();
                             placeholders.put("{exception}", ex.getLocalizedMessage() != null ? ex.getLocalizedMessage() : "null");
                             placeholders.put("{actionbar}", actionbar == null ? "null" : actionbar);
                             LiteAnnouncerProperties.sendOperationMessage("LoadingActionbarFailed", placeholders);
@@ -179,20 +176,20 @@ public class PluginControl
                 }
                 cacheAnnouncement.add(announcement);
             } catch (Exception ex) {
-                Map<String, String> placeholders = new HashMap();
+                Map<String, String> placeholders = MessageUtil.getDefaultPlaceholders();
                 placeholders.put("{exception}", ex.getLocalizedMessage() != null ? ex.getLocalizedMessage() : "null");
                 placeholders.put("{announcement}", path);
                 LiteAnnouncerProperties.sendOperationMessage("LoadingAnnouncementFailed", placeholders);
                 ex.printStackTrace();
             }
         }
-        Map<String, String> placeholders = new HashMap();
+        Map<String, String> placeholders = MessageUtil.getDefaultPlaceholders();
         placeholders.put("{announcements}", String.valueOf(cacheAnnouncement.size()));
         LiteAnnouncerProperties.sendOperationMessage("LoadingAnnouncements", placeholders);
     }
     
-    public static void reloadJsonComponents() {
-        cacheJsonComponent.clear();
+    public static void reloadJSONComponents() {
+        cacheJSONComponent.clear();
         Configuration config = ConfigurationUtil.getConfig(ConfigurationType.COMPONENTS);
         config.getConfigurationSection("Json-Components").getKeys(false).stream().forEach(path -> {
             try {
@@ -216,21 +213,21 @@ public class PluginControl
                 if (config.contains("Json-Components." + path + ".ClickEvent")) {
                     ce = new ClickEvent(ClickEvent.Action.valueOf(config.getString("Json-Components." + path + ".ClickEvent.Action").toUpperCase()), config.getString("Json-Components." + path + ".ClickEvent.Value"));
                 }
-                BaseComponent bc = new TextComponent(ChatColor.translateAlternateColorCodes('&', config.getString("Json-Components." + path + ".Text")).replace("{prefix}", PluginControl.getPrefix()));
+                BaseComponent bc = new TextComponent(ChatColor.translateAlternateColorCodes('&', config.getString("Json-Components." + path + ".Text")).replace("{prefix}", MessageUtil.getPrefix()));
                 if (he != null) bc.setHoverEvent(he);
                 if (ce != null) bc.setClickEvent(ce);
-                JsonComponent jc = new JsonComponent(placeholder, bc);
-                cacheJsonComponent.add(jc);
+                JSONComponent jc = new JSONComponent(placeholder, bc);
+                cacheJSONComponent.add(jc);
             } catch (Exception ex) {
-                Map<String, String> placeholders = new HashMap();
+                Map<String, String> placeholders = MessageUtil.getDefaultPlaceholders();
                 placeholders.put("{exception}", ex.getLocalizedMessage() != null ? ex.getLocalizedMessage() : "null");
                 placeholders.put("{component}", path);
                 LiteAnnouncerProperties.sendOperationMessage("LoadingJsonComponentFailed", placeholders);
                 ex.printStackTrace();
             }
         });
-        Map<String, String> placeholders = new HashMap();
-        placeholders.put("{components}", String.valueOf(cacheJsonComponent.size()));
+        Map<String, String> placeholders = MessageUtil.getDefaultPlaceholders();
+        placeholders.put("{components}", String.valueOf(cacheJSONComponent.size()));
         LiteAnnouncerProperties.sendOperationMessage("LoadingComponents", placeholders);
     }
     
@@ -261,7 +258,7 @@ public class PluginControl
                 .collect(Collectors.toList());
     }
     
-    public static List<JsonComponent> getJsonComponents() {
-        return cacheJsonComponent;
+    public static List<JSONComponent> getJsonComponents() {
+        return cacheJSONComponent;
     }
 }

@@ -11,6 +11,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.HoverEvent;
@@ -23,6 +24,9 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
+
+import studio.trc.bukkit.liteannouncer.configuration.ConfigurationType;
+import studio.trc.bukkit.liteannouncer.configuration.ConfigurationUtil;
 
 public class Updater
     implements Listener
@@ -55,12 +59,12 @@ public class Updater
                         List<String> array = MessageUtil.getMessageList("Updater.Link.Hover-Text");
                         for (String hover : array) {
                             end++;
-                            Map<String, String> placeholders = new HashMap();
+                            Map<String, String> placeholders = MessageUtil.getDefaultPlaceholders();
                             placeholders.put("{nowVersion}", nowVersion);
                             placeholders.put("{version}", Updater.getNewVersion());
                             placeholders.put("{link}", Updater.getLink());
                             placeholders.put("{description}", Updater.getDescription());
-                            hoverText.add(new TextComponent(MessageUtil.toColor(MessageUtil.replacePlaceholders(player, hover, placeholders))));
+                            hoverText.add(new TextComponent(MessageUtil.replacePlaceholders(player, hover, placeholders)));
                             if (end != array.size()) {
                                 hoverText.add(new TextComponent("\n"));
                             }
@@ -71,14 +75,14 @@ public class Updater
                         click.setHoverEvent(he);
                         Map<String, BaseComponent> baseComponents = new HashMap();
                         baseComponents.put("%link%", click);
-                        MessageUtil.sendJsonMessage(player, text, baseComponents);
+                        MessageUtil.sendJSONMessage(player, MessageUtil.createJsonMessage(player, text, baseComponents));
                     } else {
-                        Map<String, String> placeholders = new HashMap();
+                        Map<String, String> placeholders = MessageUtil.getDefaultPlaceholders();
                             placeholders.put("{nowVersion}", nowVersion);
                             placeholders.put("{version}", Updater.getNewVersion());
                             placeholders.put("{link}", Updater.getLink());
                             placeholders.put("{description}", Updater.getDescription());
-                        player.sendMessage(MessageUtil.toColor(MessageUtil.replacePlaceholders(player, text, placeholders)));
+                        MessageUtil.sendMessage(player, text, placeholders);
                     }
                 });
             }
@@ -114,19 +118,19 @@ public class Updater
                         foundANewVersion = true;
                         link = downloadLink;
                         description = description_;
-                        Map<String, String> placeholders = new HashMap();
+                        Map<String, String> placeholders = MessageUtil.getDefaultPlaceholders();
                         placeholders.put("{version}", version);
                         placeholders.put("%link%", downloadLink);
                         placeholders.put("{link}", downloadLink);
                         placeholders.put("{nowVersion}", nowVersion);
                         placeholders.put("{description}", description_);
-                        MessageUtil.sendMessage(Bukkit.getConsoleSender(), "Updater.Checked", placeholders);
+                        MessageUtil.sendMessage(Bukkit.getConsoleSender(), ConfigurationUtil.getConfig(ConfigurationType.MESSAGES), "Updater.Checked", placeholders);
                     }
                 } catch (InvalidConfigurationException | IOException ex) {
-                    MessageUtil.sendMessage(Bukkit.getConsoleSender(), "Updater.Error");
+                    MessageUtil.sendMessage(Bukkit.getConsoleSender(), ConfigurationUtil.getConfig(ConfigurationType.MESSAGES), "Updater.Error");
                 }
             } catch (MalformedURLException ex) {
-                MessageUtil.sendMessage(Bukkit.getConsoleSender(), "Updater.Error");
+                MessageUtil.sendMessage(Bukkit.getConsoleSender(), ConfigurationUtil.getConfig(ConfigurationType.MESSAGES), "Updater.Error");
             }
             date = new Date();
         });
