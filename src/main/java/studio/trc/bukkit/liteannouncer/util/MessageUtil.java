@@ -376,9 +376,8 @@ public class MessageUtil
     
     public static String toColor(String text) {
         try {
-            String nmsVersion = PluginControl.getNMSVersion() != null ? PluginControl.getNMSVersion() : Bukkit.getServer().getClass().getPackage().getName().split("\\.")[3];
-            if (!nmsVersion.startsWith("v1_7") && !nmsVersion.startsWith("v1_8") && !nmsVersion.startsWith("v1_9") && !nmsVersion.startsWith("v1_10") &&
-                !nmsVersion.startsWith("v1_11") && !nmsVersion.startsWith("v1_12") && !nmsVersion.startsWith("v1_13") && !nmsVersion.startsWith("v1_14") && !nmsVersion.startsWith("v1_15")) {
+            if (!Bukkit.getBukkitVersion().startsWith("1.7") && !Bukkit.getBukkitVersion().startsWith("1.8") && !Bukkit.getBukkitVersion().startsWith("1.9") && !Bukkit.getBukkitVersion().startsWith("1.10") &&
+                !Bukkit.getBukkitVersion().startsWith("1.11") && !Bukkit.getBukkitVersion().startsWith("1.12") && !Bukkit.getBukkitVersion().startsWith("1.13") && !Bukkit.getBukkitVersion().startsWith("1.14") && !Bukkit.getBukkitVersion().startsWith("1.15")) {
                 Matcher matcher = hexColorPattern.matcher(text);
                 while (matcher.find()) {
                     String color = text.substring(matcher.start(), matcher.end());

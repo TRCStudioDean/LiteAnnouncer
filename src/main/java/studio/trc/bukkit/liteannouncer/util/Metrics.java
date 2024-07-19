@@ -61,7 +61,7 @@ public class Metrics {
                 enabled,
                 this::appendPlatformData,
                 this::appendServiceData,
-                submitDataTask -> Bukkit.getScheduler().runTask(plugin, submitDataTask),
+                submitDataTask -> PluginControl.runBukkitTask(submitDataTask, 0),
                 plugin::isEnabled,
                 (message, error) -> this.plugin.getLogger().log(Level.WARNING, message, error),
                 (message) -> this.plugin.getLogger().log(Level.INFO, message),

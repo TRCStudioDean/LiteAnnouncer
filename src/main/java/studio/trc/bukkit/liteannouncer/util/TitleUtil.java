@@ -6,6 +6,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.HashMap;
+import org.bukkit.Bukkit;
 
 import org.bukkit.entity.Player;
 
@@ -25,41 +26,39 @@ public class TitleUtil
     public static Class<?> packet;
     
     public static void initialize() {
-        String nmsVersion = PluginControl.getNMSVersion();
         try {
-            if (nmsVersion.equals("v1_8_R1")) {
-                enumTitleAction = Class.forName("net.minecraft.server." + nmsVersion + ".EnumTitleAction");
-                enumPlayerInfoAction = Class.forName("net.minecraft.server." + nmsVersion + ".EnumPlayerInfoAction");
-            } else if (nmsVersion.startsWith("v1_8") || nmsVersion.startsWith("v1_9") || nmsVersion.startsWith("v1_10") || nmsVersion.startsWith("v1_11") || nmsVersion.startsWith("v1_12") || nmsVersion.startsWith("v1_13") || nmsVersion.startsWith("v1_14") || nmsVersion.startsWith("v1_15") || nmsVersion.startsWith("v1_16")) {
-                enumTitleAction = Class.forName("net.minecraft.server." + nmsVersion + ".PacketPlayOutTitle$EnumTitleAction");
-                enumPlayerInfoAction = Class.forName("net.minecraft.server." + nmsVersion + ".PacketPlayOutPlayerInfo$EnumPlayerInfoAction");
+            if (Bukkit.getBukkitVersion().startsWith("1.8-R0.1")) {
+                enumTitleAction = Class.forName("net.minecraft.server" + getPackagePath() + "EnumTitleAction");
+                enumPlayerInfoAction = Class.forName("net.minecraft.server" + getPackagePath() + "EnumPlayerInfoAction");
+            } else if (Bukkit.getBukkitVersion().startsWith("1.8") || Bukkit.getBukkitVersion().startsWith("1.9") || Bukkit.getBukkitVersion().startsWith("1.10") || Bukkit.getBukkitVersion().startsWith("1.11") || Bukkit.getBukkitVersion().startsWith("1.12") || Bukkit.getBukkitVersion().startsWith("1.13") || Bukkit.getBukkitVersion().startsWith("1.14") || Bukkit.getBukkitVersion().startsWith("1.15") || Bukkit.getBukkitVersion().startsWith("1.16")) {
+                enumTitleAction = Class.forName("net.minecraft.server" + getPackagePath() + "PacketPlayOutTitle$EnumTitleAction");
+                enumPlayerInfoAction = Class.forName("net.minecraft.server" + getPackagePath() + "PacketPlayOutPlayerInfo$EnumPlayerInfoAction");
             }
-            if (nmsVersion.startsWith("v1_17") || nmsVersion.startsWith("v1_18") || nmsVersion.startsWith("v1_19") || nmsVersion.startsWith("v1_20")) {
+            if (Bukkit.getBukkitVersion().startsWith("1.17") || Bukkit.getBukkitVersion().startsWith("1.18") || Bukkit.getBukkitVersion().startsWith("1.19") || Bukkit.getBukkitVersion().startsWith("1.20") || Bukkit.getBukkitVersion().startsWith("1.21")) {
                 interfaceChatBaseComponent = Class.forName("net.minecraft.network.chat.IChatBaseComponent");
                 packet = Class.forName("net.minecraft.network.protocol.Packet");
                 clientboundSetTitlesAnimationPacket = Class.forName("net.minecraft.network.protocol.game.ClientboundSetTitlesAnimationPacket");
                 clientboundSetTitleTextPacket = Class.forName("net.minecraft.network.protocol.game.ClientboundSetTitleTextPacket");
                 clientboundSetSubTitleTextPacket = Class.forName("net.minecraft.network.protocol.game.ClientboundSetSubtitleTextPacket");
-                craftChatMessage = Class.forName("org.bukkit.craftbukkit." + nmsVersion + ".util.CraftChatMessage");
-            } else if (!nmsVersion.startsWith("v1_7")) {
-                interfaceChatBaseComponent = Class.forName("net.minecraft.server." + nmsVersion + ".IChatBaseComponent");
-                packet = Class.forName("net.minecraft.server." + nmsVersion + ".Packet");
-                packetPlayOutTitle = Class.forName("net.minecraft.server." + nmsVersion + ".PacketPlayOutTitle");
-                craftChatMessage = Class.forName("org.bukkit.craftbukkit." + nmsVersion + ".util.CraftChatMessage");
+                craftChatMessage = Class.forName("org.bukkit.craftbukkit" + getPackagePath() + "util.CraftChatMessage");
+            } else if (!Bukkit.getBukkitVersion().startsWith("1.7")) {
+                interfaceChatBaseComponent = Class.forName("net.minecraft.server" + getPackagePath() + "IChatBaseComponent");
+                packet = Class.forName("net.minecraft.server" + getPackagePath() + "Packet");
+                packetPlayOutTitle = Class.forName("net.minecraft.server" + getPackagePath() + "PacketPlayOutTitle");
+                craftChatMessage = Class.forName("org.bukkit.craftbukkit" + getPackagePath() + "util.CraftChatMessage");
             }
-            craftPlayer = Class.forName("org.bukkit.craftbukkit." + nmsVersion + ".entity.CraftPlayer");
+            craftPlayer = Class.forName("org.bukkit.craftbukkit" + getPackagePath() + "entity.CraftPlayer");
         } catch (Exception ex) {
             ex.printStackTrace();
         }
     }
     
     public static void sendTitle(Player player, String title, String subTitle, double fadein, double stay, double fadeout) {
-        String nmsVersion = PluginControl.getNMSVersion();
-        if (nmsVersion.startsWith("v1_7")) return;
+        if (Bukkit.getBukkitVersion().startsWith("1.7")) return;
         title = MessageUtil.replacePlaceholders(player, title, new HashMap());
         subTitle = MessageUtil.replacePlaceholders(player, subTitle, new HashMap());
         try {
-            if (nmsVersion.startsWith("v1_17") || nmsVersion.startsWith("v1_18") || nmsVersion.startsWith("v1_19") || nmsVersion.startsWith("v1_20")) {
+            if (Bukkit.getBukkitVersion().startsWith("1.17") || Bukkit.getBukkitVersion().startsWith("1.18") || Bukkit.getBukkitVersion().startsWith("1.19") || Bukkit.getBukkitVersion().startsWith("1.20") || Bukkit.getBukkitVersion().startsWith("1.21")) {
                 Object animationPacket = clientboundSetTitlesAnimationPacket.getConstructor(int.class, int.class, int.class).newInstance((int) (fadein * 20), (int) (stay * 20), (int) (fadeout * 20));
                 sendPacket(player, animationPacket);
                 if (title != null) {
@@ -115,6 +114,14 @@ public class TitleUtil
             }
         } catch (SecurityException | NoSuchMethodException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
             ex.printStackTrace();
+        }
+    }
+    
+    public static String getPackagePath() {
+        try {
+            return "." + Bukkit.getServer().getClass().getPackage().getName().split("\\.")[3] + ".";
+        } catch (ArrayIndexOutOfBoundsException ex) {
+            return ".";
         }
     }
 }
