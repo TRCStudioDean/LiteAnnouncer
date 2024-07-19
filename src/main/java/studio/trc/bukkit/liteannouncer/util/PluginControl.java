@@ -6,6 +6,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import net.md_5.bungee.api.ChatColor;
@@ -16,7 +17,7 @@ import net.md_5.bungee.api.chat.TextComponent;
 
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
-import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.plugin.Plugin;
 
 import studio.trc.bukkit.liteannouncer.Main;
 import studio.trc.bukkit.liteannouncer.util.tools.Announcement;
@@ -33,11 +34,6 @@ public class PluginControl
     private static AnnouncerThread thread = null;
     private static final List<Announcement> cacheAnnouncement = new ArrayList();
     private static final List<JSONComponent> cacheJSONComponent = new ArrayList();
-    private static final String nmsVersion = Bukkit.getServer().getClass().getPackage().getName().split("\\.")[3];
-    
-    public static String getNMSVersion() {
-        return nmsVersion;
-    }
     
     public static boolean hasPermission(CommandSender sender, String path) {
         if (ConfigurationUtil.getConfig(ConfigurationType.CONFIG).getBoolean(path + ".Default")) return true;
@@ -86,28 +82,25 @@ public class PluginControl
     }
     
     public static void restartAnnouncer() {
-        new BukkitRunnable() {
-            @Override
-            public void run() {
-                if (thread != null && thread.isAlive()) {
-                    thread.isRunning = false;
-                    LiteAnnouncerProperties.sendOperationMessage("AnnouncerWorkEnds");
-                    thread = new AnnouncerThread();
-                    thread.start();
-                    thread.isRunning = true;
-                    Map<String, String> placeholders = MessageUtil.getDefaultPlaceholders();
-                    placeholders.put("{number}", String.valueOf(getAnnouncementsByPriority().size()));
-                    LiteAnnouncerProperties.sendOperationMessage("AnnouncerWorkBegins", placeholders);
-                } else {
-                    thread = new AnnouncerThread();
-                    thread.isRunning = true;
-                    thread.start();
-                    Map<String, String> placeholders = MessageUtil.getDefaultPlaceholders();
-                    placeholders.put("{number}", String.valueOf(getAnnouncementsByPriority().size()));
-                    LiteAnnouncerProperties.sendOperationMessage("AnnouncerWorkBegins", placeholders);
-                }
+        runBukkitTask(() -> {
+            if (thread != null && thread.isAlive()) {
+                thread.isRunning = false;
+                LiteAnnouncerProperties.sendOperationMessage("AnnouncerWorkEnds");
+                thread = new AnnouncerThread();
+                thread.start();
+                thread.isRunning = true;
+                Map<String, String> placeholders = MessageUtil.getDefaultPlaceholders();
+                placeholders.put("{number}", String.valueOf(getAnnouncementsByPriority().size()));
+                LiteAnnouncerProperties.sendOperationMessage("AnnouncerWorkBegins", placeholders);
+            } else {
+                thread = new AnnouncerThread();
+                thread.isRunning = true;
+                thread.start();
+                Map<String, String> placeholders = MessageUtil.getDefaultPlaceholders();
+                placeholders.put("{number}", String.valueOf(getAnnouncementsByPriority().size()));
+                LiteAnnouncerProperties.sendOperationMessage("AnnouncerWorkBegins", placeholders);
             }
-        }.runTask(Main.getInstance());
+        }, 0);
     }
 
     public static void stopAnnouncer() {
@@ -260,5 +253,29 @@ public class PluginControl
     
     public static List<JSONComponent> getJsonComponents() {
         return cacheJSONComponent;
+    }
+    
+    public static void runBukkitTask(Runnable task, long delay) {
+        try {
+            if (delay == 0) {
+                Bukkit.getScheduler().runTask(Main.getInstance(), task);
+            } else {
+                Bukkit.getScheduler().runTaskLater(Main.getInstance(), task, delay);
+            }
+        } catch (UnsupportedOperationException ex) {
+            //Folia suppport (test)
+            Consumer runnable = run -> task.run();
+            try {
+                Object globalRegionScheduler = Bukkit.class.getMethod("getGlobalRegionScheduler").invoke(null);
+                if (delay == 0) {
+                    globalRegionScheduler.getClass().getMethod("run", Plugin.class, Consumer.class).invoke(globalRegionScheduler, Main.getInstance(), runnable);
+                } else {
+                    globalRegionScheduler.getClass().getMethod("runDelayed", Plugin.class, Consumer.class, long.class).invoke(globalRegionScheduler, Main.getInstance(), runnable, delay);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                task.run();
+            }
+        }
     }
 }

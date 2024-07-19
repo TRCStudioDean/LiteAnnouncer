@@ -2,7 +2,6 @@ package studio.trc.bukkit.liteannouncer;
 
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.scheduler.BukkitRunnable;
 
 import studio.trc.bukkit.liteannouncer.command.LiteAnnouncerCommand;
 import studio.trc.bukkit.liteannouncer.util.LiteAnnouncerProperties;
@@ -35,14 +34,11 @@ public class Main
         PluginControl.reload();
         
         //It will run after the server is started.
-        new BukkitRunnable() {
-            @Override
-            public void run() {
-                if (PluginControl.enableUpdater()) {
-                    Updater.checkUpdate();
-                }
+        PluginControl.runBukkitTask(() -> {
+            if (PluginControl.enableUpdater()) {
+                Updater.checkUpdate();
             }
-        }.runTask(this);
+        }, 0);
         
         //Metrics
         if (PluginControl.enableMetrics()) {
