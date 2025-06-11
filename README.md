@@ -29,15 +29,15 @@ And more...
 - /la ignore [Announcement] [PlayerName] Toggles whether a player can receive an announcement..
 
 # Placeholders (BungeeCord)
-%player_ip% display the player's IP.
-%player_country% display the player's country or region.
-%player_language% display the player's using language.
-%player_server% display which server the player is on.
-%player_displayname% display the player's displayname.
-%player_name% display the player's name.
-%player_ping% display the player's connection milliseconds
-%player_uuid% display the player's uuid.
+- %player_ip% display the player's IP.
+- %player_country% display the player's country or region.
+- %player_language% display the player's using language.
+- %player_server% display which server the player is on.
+- %player_displayname% display the player's displayname.
+- %player_name% display the player's name.
+- %player_ping% display the player's connection milliseconds
+- %player_uuid% display the player's uuid.
 
 # Statistics
-[![BigImage](https://bstats.org/signatures/bukkit/LiteAnnouncer.svg)](https://bstats.org/plugin/bukkit/LiteAnnouncer)
-[![BigImage](https://bstats.org/signatures/bungee/LiteAnnouncer.svg)](https://bstats.org/plugin/bungee/LiteAnnouncer)
+[![BigImage](https://bstats.org/signatures/bukkit/LiteAnnouncer.svg)](https://bstats.org/plugin/bukkit/LiteAnnouncer)  
+[![BigImage](https://bstats.org/signatures/bungee/LiteAnnouncer.svg)](https://bstats.org/plugin/bungee/LiteAnnouncer)  
