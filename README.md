@@ -40,4 +40,4 @@ And more...
 
 # Statistics
 [![BigImage](https://bstats.org/signatures/bukkit/LiteAnnouncer.svg)](https://bstats.org/plugin/bukkit/LiteAnnouncer)  
-[![BigImage](https://bstats.org/signatures/bungee/LiteAnnouncer.svg)](https://bstats.org/plugin/bungee/LiteAnnouncer)  
+[![BigImage](https://bstats.org/signatures/bungeecord/LiteAnnouncer.svg)](https://bstats.org/plugin/bungeecord/LiteAnnouncer)  
