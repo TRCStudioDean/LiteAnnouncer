@@ -1,4 +1,4 @@
-package studio.trc.bungee.liteannouncer.util;
+package studio.trc.bungee.liteannouncer.message;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -6,22 +6,28 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
-import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.CommandSender;
-import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 
+import studio.trc.bungee.liteannouncer.Main;
 import studio.trc.bungee.liteannouncer.configuration.ConfigurationType;
 import studio.trc.bungee.liteannouncer.configuration.ConfigurationUtil;
+import studio.trc.bungee.liteannouncer.message.color.ColorUtils;
+import studio.trc.bungee.liteannouncer.util.PluginControl;
 
 public class MessageUtil
 {
-    private static final Pattern hexColorPattern = Pattern.compile("#[a-fA-F0-9]{6}");
+    private static final Map<String, String> defaultPlaceholders = new HashMap();
+    
+    public static void loadPlaceholders() {
+        defaultPlaceholders.clear();
+        defaultPlaceholders.put("{plugin_version}", Main.getInstance().getDescription().getVersion());
+        defaultPlaceholders.put("{language}", getLanguage());
+        defaultPlaceholders.put("{prefix}", getPrefix());
+    }
     
     /**
      * Send message to command sender.
@@ -32,10 +38,10 @@ public class MessageUtil
         if (sender == null) return;
         List<String> messages = ConfigurationUtil.getConfig(ConfigurationType.MESSAGES).getStringList(getLanguage() + "." + path);
         if (messages.isEmpty() && !ConfigurationUtil.getConfig(ConfigurationType.MESSAGES).getString(getLanguage() + "." + path).equals("[]")) {
-            sender.sendMessage(toColor(replacePlaceholders(sender, ConfigurationUtil.getConfig(ConfigurationType.MESSAGES).getString(getLanguage() + "." + path), new HashMap())));
+            sender.sendMessage(ColorUtils.toColor(replacePlaceholders(sender, ConfigurationUtil.getConfig(ConfigurationType.MESSAGES).getString(getLanguage() + "." + path), new HashMap())));
         } else {
             for (String message : messages) {
-                sender.sendMessage(toColor(replacePlaceholders(sender, message, new HashMap())));
+                sender.sendMessage(ColorUtils.toColor(replacePlaceholders(sender, message, new HashMap())));
             }
         }
     }
@@ -51,10 +57,10 @@ public class MessageUtil
         if (sender == null) return;
         List<String> messages = ConfigurationUtil.getConfig(ConfigurationType.MESSAGES).getStringList(getLanguage() + "." + path);
         if (messages.isEmpty() && !ConfigurationUtil.getConfig(ConfigurationType.MESSAGES).getString(getLanguage() + "." + path).equals("[]")) {
-            sender.sendMessage(toColor(replacePlaceholders(sender, ConfigurationUtil.getConfig(ConfigurationType.MESSAGES).getString(getLanguage() + "." + path), placeholders)));
+            sender.sendMessage(ColorUtils.toColor(replacePlaceholders(sender, ConfigurationUtil.getConfig(ConfigurationType.MESSAGES).getString(getLanguage() + "." + path), placeholders)));
         } else {
             for (String message : messages) {
-                sender.sendMessage(toColor(replacePlaceholders(sender, message, placeholders)));
+                sender.sendMessage(ColorUtils.toColor(replacePlaceholders(sender, message, placeholders)));
             }
         }
     }
@@ -66,7 +72,7 @@ public class MessageUtil
      * @param baseComponents Json components.
      */
     public static void sendJsonMessage(CommandSender sender, String message, Map<String, BaseComponent> baseComponents) {
-        List<BaseComponent> components = createJsonMessage(sender, prefix(message), baseComponents);
+        List<BaseComponent> components = createJsonMessage(sender, message, baseComponents);
         if (sender instanceof ProxiedPlayer) {
             ((ProxiedPlayer) sender).sendMessage(components.toArray(new BaseComponent[0]));
         } else {
@@ -74,7 +80,7 @@ public class MessageUtil
             for (BaseComponent compoents : components) {
                 sb.append(compoents.toPlainText());
             }
-            sender.sendMessage(toColor(sb.toString()));
+            sender.sendMessage(ColorUtils.toColor(sb.toString()));
         }
     }
     
@@ -94,7 +100,7 @@ public class MessageUtil
             for (BaseComponent compoents : components) {
                 sb.append(compoents.toPlainText());
             }
-            sender.sendMessage(toColor(sb.toString()));
+            sender.sendMessage(ColorUtils.toColor(sb.toString()));
         }
     }
     
@@ -134,7 +140,7 @@ public class MessageUtil
             if (paragraph.isPlaceholder()) {
                 components.add(paragraph.getComponent());
             } else {
-                components.add(new TextComponent(toColor(message.substring(paragraph.start(), paragraph.end()).replace("/n", "\n"))));
+                components.add(new TextComponent(ColorUtils.toColor(message.substring(paragraph.start(), paragraph.end()).replace("/n", "\n"))));
             }
         }
         return components;
@@ -239,7 +245,7 @@ public class MessageUtil
     }
     
     public static String getMessage(String path) {
-        return toColor(prefix(ConfigurationUtil.getConfig(ConfigurationType.MESSAGES).getString(getLanguage() + "." + path)));
+        return ConfigurationUtil.getConfig(ConfigurationType.MESSAGES).getString(getLanguage() + "." + path);
     }
     
     public static List<String> getMessageList(String path) {
@@ -249,21 +255,9 @@ public class MessageUtil
     public static String getLanguage() {
         return ConfigurationUtil.getConfig(ConfigurationType.CONFIG).getString("Language");
     }
-    
-    public static String toColor(String text) {
-        try {
-            Matcher matcher = hexColorPattern.matcher(text);
-            while (matcher.find()) {
-                String color = text.substring(matcher.start(), matcher.end());
-                text = text.replace(color, net.md_5.bungee.api.ChatColor.of(color).toString());
-                matcher = hexColorPattern.matcher(text);
-            }
-        } catch (Throwable t) {}
-        return ChatColor.translateAlternateColorCodes('&', text);
-    }
-    
-    public static String prefix(String text) {
-        return replacePlaceholders(ProxyServer.getInstance().getConsole(), text, new HashMap());
+
+    public static String getPrefix() {
+        return ColorUtils.toColor(ConfigurationUtil.getConfig(ConfigurationType.CONFIG).getString("Prefix"));
     }
     
     public static String toLocallyPlaceholders(String text, ProxiedPlayer player) {
@@ -276,7 +270,7 @@ public class MessageUtil
         placeholders.put("%player_name%", player.getName());
         placeholders.put("%player_ping%", String.valueOf(player.getPing()));
         placeholders.put("%player_uuid%", player.getUniqueId().toString());
-        return toColor(replacePlaceholders(player, text, placeholders));
+        return ColorUtils.toColor(replacePlaceholders(player, text, placeholders));
     }
     
     /**

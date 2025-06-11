@@ -9,7 +9,7 @@ import java.util.Map;
 import net.md_5.bungee.config.Configuration;
 
 import studio.trc.bungee.liteannouncer.Main;
-import studio.trc.bungee.liteannouncer.util.MessageUtil;
+import studio.trc.bungee.liteannouncer.message.MessageUtil;
 
 public class DefaultConfigurationFile
 {

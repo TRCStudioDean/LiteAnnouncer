@@ -20,7 +20,7 @@ import net.md_5.bungee.config.Configuration;
 import studio.trc.bungee.liteannouncer.async.AnnouncerThread;
 import studio.trc.bungee.liteannouncer.configuration.ConfigurationType;
 import studio.trc.bungee.liteannouncer.configuration.ConfigurationUtil;
-import studio.trc.bungee.liteannouncer.util.MessageUtil;
+import studio.trc.bungee.liteannouncer.message.MessageUtil;
 import studio.trc.bungee.liteannouncer.util.PluginControl;
 
 public class Announcement

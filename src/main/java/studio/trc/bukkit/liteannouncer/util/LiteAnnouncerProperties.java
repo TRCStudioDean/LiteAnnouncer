@@ -1,5 +1,6 @@
 package studio.trc.bukkit.liteannouncer.util;
 
+import studio.trc.bukkit.liteannouncer.message.MessageUtil;
 import java.io.IOException;
 import java.util.Locale;
 import java.util.Map;

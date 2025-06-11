@@ -23,6 +23,8 @@ import studio.trc.bungee.liteannouncer.util.tools.ActionBar;
 import studio.trc.bungee.liteannouncer.util.tools.Announcement;
 import studio.trc.bungee.liteannouncer.util.tools.JsonComponent;
 import studio.trc.bungee.liteannouncer.util.tools.Title;
+import studio.trc.bungee.liteannouncer.message.MessageUtil;
+import studio.trc.bungee.liteannouncer.message.color.ColorUtils;
 
 public class PluginControl
 {
@@ -31,7 +33,7 @@ public class PluginControl
     private static final List<JsonComponent> cacheJsonComponent = new ArrayList();
     
     public static String getPrefix() {
-        return MessageUtil.toColor(ConfigurationUtil.getConfig(ConfigurationType.CONFIG).getString("Prefix"));
+        return ColorUtils.toColor(ConfigurationUtil.getConfig(ConfigurationType.CONFIG).getString("Prefix"));
     }
     
     public static boolean hasPermission(CommandSender sender, String path) {
@@ -179,7 +181,7 @@ public class PluginControl
                     List<String> array = config.getStringList("Json-Components." + path + ".HoverEvent.Hover-Values");
                     for (String hover : array) {
                         end++;
-                        hoverText.add(new TextComponent(MessageUtil.prefix(hover)));
+                        hoverText.add(new TextComponent(ColorUtils.toColor(hover)));
                         if (end != array.size()) {
                             hoverText.add(new TextComponent("\n"));
                         }

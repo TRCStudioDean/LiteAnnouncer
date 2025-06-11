@@ -8,7 +8,7 @@ import lombok.Setter;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.config.Configuration;
 
-import studio.trc.bungee.liteannouncer.util.MessageUtil;
+import studio.trc.bungee.liteannouncer.message.MessageUtil;
 
 /**
  * Used to manage configuration files.

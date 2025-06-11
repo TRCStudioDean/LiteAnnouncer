@@ -27,6 +27,8 @@ import org.bukkit.event.player.PlayerJoinEvent;
 
 import studio.trc.bukkit.liteannouncer.configuration.ConfigurationType;
 import studio.trc.bukkit.liteannouncer.configuration.ConfigurationUtil;
+import studio.trc.bukkit.liteannouncer.message.color.ColorUtils;
+import studio.trc.bukkit.liteannouncer.message.MessageUtil;
 
 public class Updater
     implements Listener
@@ -53,7 +55,7 @@ public class Updater
                 String nowVersion = Bukkit.getPluginManager().getPlugin("LiteAnnouncer").getDescription().getVersion();
                 MessageUtil.getMessageList("Updater.Checked").stream().forEach(text -> {
                     if (text.toLowerCase().contains("%link%")) {
-                        BaseComponent click = new TextComponent(MessageUtil.getMessage("Updater.Link.Message"));
+                        BaseComponent click = new TextComponent(ColorUtils.toColor(MessageUtil.getMessage("Updater.Link.Message")));
                         List<BaseComponent> hoverText = new ArrayList();
                         int end = 0;
                         List<String> array = MessageUtil.getMessageList("Updater.Link.Hover-Text");

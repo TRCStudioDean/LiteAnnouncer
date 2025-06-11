@@ -1,13 +1,11 @@
-package studio.trc.bukkit.liteannouncer.util;
+package studio.trc.bukkit.liteannouncer.message;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+
 import lombok.Getter;
 import lombok.Setter;
 
@@ -16,8 +14,6 @@ import me.clip.placeholderapi.PlaceholderAPI;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.TextComponent;
 
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -25,12 +21,12 @@ import studio.trc.bukkit.liteannouncer.Main;
 import studio.trc.bukkit.liteannouncer.configuration.Configuration;
 import studio.trc.bukkit.liteannouncer.configuration.ConfigurationType;
 import studio.trc.bukkit.liteannouncer.configuration.ConfigurationUtil;
+import studio.trc.bukkit.liteannouncer.message.color.ColorUtils;
 
 public class MessageUtil
 {
     private static final Map<String, String> defaultPlaceholders = new HashMap();
     private static final Map<String, BaseComponent> defaultJsonComponents = new HashMap();
-    private static final Pattern hexColorPattern = Pattern.compile("#[a-fA-F0-9]{6}");
     
     @Getter
     @Setter
@@ -217,7 +213,7 @@ public class MessageUtil
                 string.append(message.substring(paragraph.startsWith, paragraph.endsWith).replace("/n", "\n"));
             }
         });
-        return toColor(string.toString());
+        return ColorUtils.toColor(string.toString());
     }
     
     /**
@@ -238,7 +234,7 @@ public class MessageUtil
                 string.append(toPlaceholderAPIResult(message.substring(paragraph.startsWith, paragraph.endsWith), sender).replace("/n", "\n"));
             }
         });
-        return toColor(string.toString());
+        return ColorUtils.toColor(string.toString());
     }
     
     /**
@@ -255,7 +251,7 @@ public class MessageUtil
             if (paragraph.isPlaceholder()) {
                 components.add(paragraph.getComponent());
             } else {
-                components.add(new TextComponent(toColor(toPlaceholderAPIResult(message.substring(paragraph.startsWith, paragraph.endsWith), sender).replace("/n", "\n"))));
+                components.add(new TextComponent(ColorUtils.toColor(toPlaceholderAPIResult(message.substring(paragraph.startsWith, paragraph.endsWith), sender).replace("/n", "\n"))));
             }
         });
         return components;
@@ -351,11 +347,11 @@ public class MessageUtil
     }
     
     public static String toPlaceholderAPIResult(String text, CommandSender sender) {
-        return PluginControl.usePlaceholderAPI() && sender instanceof Player ? toColor(PlaceholderAPI.setPlaceholders((Player) sender, text)) : toColor(text);
+        return text != null && isEnabledPAPI() && sender instanceof Player ? PlaceholderAPI.setPlaceholders((Player) sender, text) : text;
     }
     
     public static String getMessage(String path) {
-        return toColor(prefix(ConfigurationUtil.getConfig(ConfigurationType.MESSAGES).getString(getLanguage() + "." + path)));
+        return ConfigurationUtil.getConfig(ConfigurationType.MESSAGES).getString(getLanguage() + "." + path);
     }
     
     public static List<String> getMessageList(String path) {
@@ -367,30 +363,11 @@ public class MessageUtil
     }
 
     public static String getPrefix() {
-        return MessageUtil.toColor(ConfigurationUtil.getConfig(ConfigurationType.CONFIG).getString("Prefix"));
+        return ColorUtils.toColor(ConfigurationUtil.getConfig(ConfigurationType.CONFIG).getString("Prefix"));
     }
     
     public static Map<String, String> getDefaultPlaceholders() {
         return new HashMap(defaultPlaceholders);
-    }
-    
-    public static String toColor(String text) {
-        try {
-            if (!Bukkit.getBukkitVersion().startsWith("1.7") && !Bukkit.getBukkitVersion().startsWith("1.8") && !Bukkit.getBukkitVersion().startsWith("1.9") && !Bukkit.getBukkitVersion().startsWith("1.10") &&
-                !Bukkit.getBukkitVersion().startsWith("1.11") && !Bukkit.getBukkitVersion().startsWith("1.12") && !Bukkit.getBukkitVersion().startsWith("1.13") && !Bukkit.getBukkitVersion().startsWith("1.14") && !Bukkit.getBukkitVersion().startsWith("1.15")) {
-                Matcher matcher = hexColorPattern.matcher(text);
-                while (matcher.find()) {
-                    String color = text.substring(matcher.start(), matcher.end());
-                    text = text.replace(color, net.md_5.bungee.api.ChatColor.of(color).toString());
-                    matcher = hexColorPattern.matcher(text);
-                }
-            }
-        } catch (Throwable t) {}
-        return ChatColor.translateAlternateColorCodes('&', text);
-    }
-    
-    public static String prefix(String text) {
-        return replacePlaceholders(Bukkit.getConsoleSender(), text, new HashMap());
     }
     
     /**
@@ -414,13 +391,14 @@ public class MessageUtil
         ENGLISH("English");
         
         public static Language getLocaleLanguage() {
-            Locale lang = Locale.getDefault();
-            if (lang.equals(Locale.SIMPLIFIED_CHINESE)) {
-                return SIMPLIFIED_CHINESE;
-            } else if (lang.equals(Locale.TRADITIONAL_CHINESE)) {
-                return TRADITIONAL_CHINESE;
-            } else if (lang.equals(Locale.CHINA) || lang.equals(Locale.CHINESE)) {
-                return SIMPLIFIED_CHINESE;
+            String language = System.getProperty("user.language");
+            String country = System.getProperty("user.country");
+            if (language.equalsIgnoreCase("zh")) {
+                if (country != null && country.equalsIgnoreCase("cn")) {
+                    return SIMPLIFIED_CHINESE;
+                } else {
+                    return TRADITIONAL_CHINESE;
+                }
             } else {
                 return ENGLISH;
             }

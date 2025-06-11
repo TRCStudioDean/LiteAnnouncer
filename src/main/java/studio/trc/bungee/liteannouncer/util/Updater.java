@@ -22,7 +22,9 @@ import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.config.Configuration;
 import net.md_5.bungee.event.EventHandler;
 
+import studio.trc.bungee.liteannouncer.message.color.ColorUtils;
 import studio.trc.bungee.liteannouncer.configuration.ConfigurationUtil;
+import studio.trc.bungee.liteannouncer.message.MessageUtil;
 
 public class Updater
     implements Listener
@@ -50,7 +52,7 @@ public class Updater
                 String nowVersion = proxy.getPluginManager().getPlugin("LiteAnnouncer").getDescription().getVersion();
                 MessageUtil.getMessageList("Updater.Checked").stream().forEach(text -> {
                     if (text.toLowerCase().contains("%link%")) {
-                        BaseComponent click = new TextComponent(MessageUtil.getMessage("Updater.Link.Message"));
+                        BaseComponent click = new TextComponent(ColorUtils.toColor(MessageUtil.getMessage("Updater.Link.Message")));
                         List<BaseComponent> hoverText = new ArrayList();
                         int end = 0;
                         List<String> array = MessageUtil.getMessageList("Updater.Link.Hover-Text");
@@ -61,7 +63,7 @@ public class Updater
                             placeholders.put("{version}", Updater.getNewVersion());
                             placeholders.put("{link}", Updater.getLink());
                             placeholders.put("{description}", Updater.getDescription());
-                            hoverText.add(new TextComponent(MessageUtil.toColor(MessageUtil.replacePlaceholders(player, hover, placeholders))));
+                            hoverText.add(new TextComponent(ColorUtils.toColor(MessageUtil.replacePlaceholders(player, hover, placeholders))));
                             if (end != array.size()) {
                                 hoverText.add(new TextComponent("\n"));
                             }
@@ -79,7 +81,7 @@ public class Updater
                             placeholders.put("{version}", Updater.getNewVersion());
                             placeholders.put("{link}", Updater.getLink());
                             placeholders.put("{description}", Updater.getDescription());
-                        player.sendMessage(MessageUtil.toColor(MessageUtil.replacePlaceholders(player, text, placeholders)));
+                        player.sendMessage(ColorUtils.toColor(MessageUtil.replacePlaceholders(player, text, placeholders)));
                     }
                 });
             }

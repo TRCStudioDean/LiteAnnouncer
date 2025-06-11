@@ -1,13 +1,14 @@
 package studio.trc.bukkit.liteannouncer.util;
 
+import studio.trc.bukkit.liteannouncer.message.MessageUtil;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.HashMap;
-import org.bukkit.Bukkit;
 
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 import studio.trc.bukkit.liteannouncer.util.tools.Title;
@@ -16,14 +17,12 @@ public class TitleUtil
 {
     public static Class<?> enumTitleAction;
     public static Class<?> enumPlayerInfoAction;
-    public static Class<?> clientboundSetTitlesAnimationPacket;
-    public static Class<?> clientboundSetTitleTextPacket;
-    public static Class<?> clientboundSetSubTitleTextPacket;
     public static Class<?> craftChatMessage;
     public static Class<?> interfaceChatBaseComponent;
     public static Class<?> craftPlayer;
     public static Class<?> packetPlayOutTitle;
     public static Class<?> packet;
+    public static Method sendPacket = null;
     
     public static void initialize() {
         try {
@@ -37,9 +36,6 @@ public class TitleUtil
             if (Bukkit.getBukkitVersion().startsWith("1.17") || Bukkit.getBukkitVersion().startsWith("1.18") || Bukkit.getBukkitVersion().startsWith("1.19") || Bukkit.getBukkitVersion().startsWith("1.20") || Bukkit.getBukkitVersion().startsWith("1.21")) {
                 interfaceChatBaseComponent = Class.forName("net.minecraft.network.chat.IChatBaseComponent");
                 packet = Class.forName("net.minecraft.network.protocol.Packet");
-                clientboundSetTitlesAnimationPacket = Class.forName("net.minecraft.network.protocol.game.ClientboundSetTitlesAnimationPacket");
-                clientboundSetTitleTextPacket = Class.forName("net.minecraft.network.protocol.game.ClientboundSetTitleTextPacket");
-                clientboundSetSubTitleTextPacket = Class.forName("net.minecraft.network.protocol.game.ClientboundSetSubtitleTextPacket");
                 craftChatMessage = Class.forName("org.bukkit.craftbukkit" + getPackagePath() + "util.CraftChatMessage");
             } else if (!Bukkit.getBukkitVersion().startsWith("1.7")) {
                 interfaceChatBaseComponent = Class.forName("net.minecraft.server" + getPackagePath() + "IChatBaseComponent");
@@ -58,18 +54,9 @@ public class TitleUtil
         title = MessageUtil.replacePlaceholders(player, title, new HashMap());
         subTitle = MessageUtil.replacePlaceholders(player, subTitle, new HashMap());
         try {
-            if (Bukkit.getBukkitVersion().startsWith("1.17") || Bukkit.getBukkitVersion().startsWith("1.18") || Bukkit.getBukkitVersion().startsWith("1.19") || Bukkit.getBukkitVersion().startsWith("1.20") || Bukkit.getBukkitVersion().startsWith("1.21")) {
-                Object animationPacket = clientboundSetTitlesAnimationPacket.getConstructor(int.class, int.class, int.class).newInstance((int) (fadein * 20), (int) (stay * 20), (int) (fadeout * 20));
-                sendPacket(player, animationPacket);
-                if (title != null) {
-                    Object titleMessagePacket = clientboundSetTitleTextPacket.getConstructor(interfaceChatBaseComponent).newInstance(craftChatMessage.getMethod("fromStringOrNull", String.class).invoke(null, title));
-                    sendPacket(player, titleMessagePacket);
-                }
-                if (subTitle != null) {
-                    Object subTitleMessagePacket = clientboundSetSubTitleTextPacket.getConstructor(interfaceChatBaseComponent).newInstance(craftChatMessage.getMethod("fromStringOrNull", String.class).invoke(null, subTitle));
-                    sendPacket(player, subTitleMessagePacket);
-                }
-            } else {
+            player.sendTitle(title, subTitle, (int) (fadein * 20), (int) (stay * 20), (int) (fadeout * 20));
+        } catch (NoSuchMethodError ex) {
+            try {
                 Object titleEnumPacket = enumTitleAction.getMethod("valueOf", String.class).invoke(enumTitleAction, "TITLE");
                 Object subTitleEnumPacket = enumTitleAction.getMethod("valueOf", String.class).invoke(enumTitleAction, "SUBTITLE");
                 Object animationPacket = packetPlayOutTitle.getConstructor(int.class, int.class, int.class).newInstance((int) (fadein * 20), (int) (stay * 20), (int) (fadeout * 20));
@@ -82,9 +69,9 @@ public class TitleUtil
                     Object subTitleMessagePacket = packetPlayOutTitle.getConstructor(enumTitleAction, interfaceChatBaseComponent).newInstance(subTitleEnumPacket, Array.get(craftChatMessage.getMethod("fromString", String.class).invoke(null, subTitle), 0));
                     sendPacket(player, subTitleMessagePacket);
                 }
+            } catch (Exception ex1) {
+                ex1.printStackTrace();
             }
-        } catch (SecurityException | IllegalArgumentException | IllegalAccessException | NoSuchMethodException | InvocationTargetException | InstantiationException ex) {
-            ex.printStackTrace();
         }
     }
     
@@ -105,10 +92,12 @@ public class TitleUtil
             } else {
                 return;
             }
-            Method sendPacket = Arrays.stream(connection.getClass().getMethods())
+            if (sendPacket == null) {
+                sendPacket = Arrays.stream(connection.getClass().getMethods())
                     .filter(method -> 
                             method.getParameterTypes().length == 1 && method.getParameterTypes()[0].getSimpleName().equals("Packet") && method.getReturnType().getSimpleName().equals("void"))
                     .findFirst().orElse(null);
+            }
             if (sendPacket != null) {
                 sendPacket.invoke(connection, packetObject);
             }

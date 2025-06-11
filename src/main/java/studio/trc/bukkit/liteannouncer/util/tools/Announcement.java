@@ -5,8 +5,6 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import lombok.Getter;
 
@@ -22,7 +20,7 @@ import studio.trc.bukkit.liteannouncer.async.AnnouncerThread;
 import studio.trc.bukkit.liteannouncer.configuration.ConfigurationType;
 import studio.trc.bukkit.liteannouncer.configuration.ConfigurationUtil;
 import studio.trc.bukkit.liteannouncer.util.ActionBarUtil;
-import studio.trc.bukkit.liteannouncer.util.MessageUtil;
+import studio.trc.bukkit.liteannouncer.message.MessageUtil;
 import studio.trc.bukkit.liteannouncer.util.PluginControl;
 import studio.trc.bukkit.liteannouncer.util.TitleUtil;
 
@@ -188,7 +186,7 @@ public class Announcement
             if (!asyncThread.isRunning) return;
             broadcast();
         } catch (InterruptedException ex) {
-            Logger.getLogger(Announcement.class.getName()).log(Level.SEVERE, null, ex);
+            ex.printStackTrace();
         }
     }
     

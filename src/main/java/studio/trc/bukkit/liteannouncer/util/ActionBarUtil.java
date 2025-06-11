@@ -1,5 +1,7 @@
 package studio.trc.bukkit.liteannouncer.util;
 
+import studio.trc.bukkit.liteannouncer.message.MessageUtil;
+import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -22,6 +24,7 @@ public class ActionBarUtil
     public static Class<?> craftChatMessage;
     public static Class<?> craftPlayer;
     public static Class<?> packet;
+    public static Method sendPacket = null;
     
     public static void initialize() {
         try {
@@ -51,29 +54,38 @@ public class ActionBarUtil
         if (text == null) return;
         text = MessageUtil.replacePlaceholders(player, text, new HashMap());
         try {
-            Object actionbar;
-            // 1.8 - 1.11.2
-            if (Bukkit.getBukkitVersion().startsWith("1.8") || Bukkit.getBukkitVersion().startsWith("1.9") || Bukkit.getBukkitVersion().startsWith("1.10") || Bukkit.getBukkitVersion().startsWith("1.11")) {
-                actionbar = packetPlayOutChat.getConstructor(interfaceChatBaseComponent, byte.class).newInstance(
-                        chatComponentText.getConstructor(String.class).newInstance(text),
-                        (byte) 2);
-            // 1.12 - 1.15.2
-            } else if (Bukkit.getBukkitVersion().startsWith("1.12") || Bukkit.getBukkitVersion().startsWith("1.13") || Bukkit.getBukkitVersion().startsWith("1.14") || Bukkit.getBukkitVersion().startsWith("1.15")) {
-                actionbar = packetPlayOutChat.getConstructor(interfaceChatBaseComponent, chatMessageType).newInstance(
-                        chatComponentText.getConstructor(String.class).newInstance(text),
-                        chatMessageType.getMethod("a", byte.class).invoke(chatMessageType, (byte) 2));
-            // 1.16 - 1.16.5
-            } else if (Bukkit.getBukkitVersion().startsWith("1.16")) {
-                actionbar = packetPlayOutChat.getConstructor(interfaceChatBaseComponent, chatMessageType, UUID.class).newInstance(
-                        chatComponentText.getConstructor(String.class).newInstance(text),
-                        chatMessageType.getMethod("a", byte.class).invoke(chatMessageType, (byte) 2),
-                        UUID.randomUUID());
-            // 1.17+
-            } else {
-                actionbar = clientboundSetActionBarTextPacket.getConstructor(interfaceChatBaseComponent).newInstance(craftChatMessage.getMethod("fromStringOrNull", String.class).invoke(null, text));
+            player.getClass().getMethod("sendActionBar", String.class).invoke(player, text);
+        } catch (NoSuchMethodError ex) {
+            try {
+                Object actionbar;
+                // 1.8 - 1.11.2
+                if (Bukkit.getBukkitVersion().startsWith("1.8") || Bukkit.getBukkitVersion().startsWith("1.9") || Bukkit.getBukkitVersion().startsWith("1.10") || Bukkit.getBukkitVersion().startsWith("1.11")) {
+                    actionbar = packetPlayOutChat.getConstructor(interfaceChatBaseComponent, byte.class).newInstance(
+                            chatComponentText.getConstructor(String.class).newInstance(text),
+                            (byte) 2);
+                // 1.12 - 1.15.2
+                } else if (Bukkit.getBukkitVersion().startsWith("1.12") || Bukkit.getBukkitVersion().startsWith("1.13") || Bukkit.getBukkitVersion().startsWith("1.14") || Bukkit.getBukkitVersion().startsWith("1.15")) {
+                    actionbar = packetPlayOutChat.getConstructor(interfaceChatBaseComponent, chatMessageType).newInstance(
+                            chatComponentText.getConstructor(String.class).newInstance(text),
+                            chatMessageType.getMethod("a", byte.class).invoke(chatMessageType, (byte) 2));
+                // 1.16 - 1.16.5
+                } else if (Bukkit.getBukkitVersion().startsWith("1.16")) {
+                    actionbar = packetPlayOutChat.getConstructor(interfaceChatBaseComponent, chatMessageType, UUID.class).newInstance(
+                            chatComponentText.getConstructor(String.class).newInstance(text),
+                            chatMessageType.getMethod("a", byte.class).invoke(chatMessageType, (byte) 2),
+                            UUID.randomUUID());
+                // 1.17 - 1.18
+                } else if (Bukkit.getBukkitVersion().startsWith("1.17") || Bukkit.getBukkitVersion().startsWith("1.18")) {
+                    actionbar = clientboundSetActionBarTextPacket.getConstructor(interfaceChatBaseComponent).newInstance(craftChatMessage.getMethod("fromStringOrNull", String.class).invoke(null, text));
+                // 1.19 +
+                } else {
+                    actionbar = clientboundSetActionBarTextPacket.getConstructor(interfaceChatBaseComponent).newInstance(Array.get(craftChatMessage.getMethod("fromString", String.class).invoke(null, text), 0));
+                }
+                sendPacket(player, actionbar);
+            } catch (Exception ex1) {
+                ex.printStackTrace();
             }
-            sendPacket(player, actionbar);
-        } catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | InstantiationException ex) {
+        } catch (Exception ex) {
             ex.printStackTrace();
         }
     }
@@ -95,10 +107,12 @@ public class ActionBarUtil
             } else {
                 return;
             }
-            Method sendPacket = Arrays.stream(connection.getClass().getMethods())
+            if (sendPacket == null) {
+                sendPacket = Arrays.stream(connection.getClass().getMethods())
                     .filter(method -> 
                             method.getParameterTypes().length == 1 && method.getParameterTypes()[0].getSimpleName().equals("Packet") && method.getReturnType().getSimpleName().equals("void"))
                     .findFirst().orElse(null);
+            }
             if (sendPacket != null) {
                 sendPacket.invoke(connection, packetObject);
             }

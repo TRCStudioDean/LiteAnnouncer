@@ -2,7 +2,6 @@ package studio.trc.bukkit.liteannouncer.command;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -17,7 +16,7 @@ import org.bukkit.entity.Player;
 
 import studio.trc.bukkit.liteannouncer.configuration.ConfigurationType;
 import studio.trc.bukkit.liteannouncer.configuration.ConfigurationUtil;
-import studio.trc.bukkit.liteannouncer.util.MessageUtil;
+import studio.trc.bukkit.liteannouncer.message.MessageUtil;
 import studio.trc.bukkit.liteannouncer.util.PluginControl;
 import studio.trc.bukkit.liteannouncer.util.tools.Announcement;
 

@@ -9,6 +9,8 @@ import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.ProxyServer;
 
 import studio.trc.bungee.liteannouncer.Main;
+import studio.trc.bungee.liteannouncer.message.color.ColorUtils;
+import studio.trc.bungee.liteannouncer.message.MessageUtil;
 
 public class LiteAnnouncerProperties
 {
@@ -28,7 +30,7 @@ public class LiteAnnouncerProperties
     public static void sendOperationMessage(String path) {
         CommandSender sender = ProxyServer.getInstance().getConsole();
         if (propertiesFile.containsKey(path)) {
-            sender.sendMessage(MessageUtil.toColor(propertiesFile.getProperty(path)));
+            sender.sendMessage(ColorUtils.toColor(propertiesFile.getProperty(path)));
         }
     }
     
@@ -36,7 +38,7 @@ public class LiteAnnouncerProperties
         CommandSender sender = ProxyServer.getInstance().getConsole();
         if (propertiesFile.containsKey(path)) {
             String message = propertiesFile.getProperty(path);
-            sender.sendMessage(MessageUtil.toColor(MessageUtil.replacePlaceholders(sender, message, placeholders)));
+            sender.sendMessage(ColorUtils.toColor(MessageUtil.replacePlaceholders(sender, message, placeholders)));
         }
     }
 }

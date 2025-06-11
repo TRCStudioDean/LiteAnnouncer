@@ -16,7 +16,7 @@ import org.bukkit.configuration.file.YamlConfiguration;
 
 import studio.trc.bukkit.liteannouncer.Main;
 import studio.trc.bukkit.liteannouncer.util.LiteAnnouncerProperties;
-import studio.trc.bukkit.liteannouncer.util.MessageUtil;
+import studio.trc.bukkit.liteannouncer.message.MessageUtil;
 
 public class ConfigurationUtil
 {

@@ -28,6 +28,8 @@ import studio.trc.bukkit.liteannouncer.configuration.ConfigurationType;
 import studio.trc.bukkit.liteannouncer.configuration.ConfigurationUtil;
 import studio.trc.bukkit.liteannouncer.util.tools.ActionBar;
 import studio.trc.bukkit.liteannouncer.util.tools.Title;
+import studio.trc.bukkit.liteannouncer.message.MessageUtil;
+import studio.trc.bukkit.liteannouncer.message.color.ColorUtils;
 
 public class PluginControl
 {
@@ -195,7 +197,7 @@ public class PluginControl
                     List<String> array = config.getStringList("Json-Components." + path + ".HoverEvent.Hover-Values");
                     for (String hover : array) {
                         end++;
-                        hoverText.add(new TextComponent(MessageUtil.prefix(hover)));
+                        hoverText.add(new TextComponent(ColorUtils.toColor(hover)));
                         if (end != array.size()) {
                             hoverText.add(new TextComponent("\n"));
                         }

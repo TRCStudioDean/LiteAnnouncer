@@ -8,7 +8,7 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.inventory.ItemStack;
 
-import studio.trc.bukkit.liteannouncer.util.MessageUtil;
+import studio.trc.bukkit.liteannouncer.message.MessageUtil;
 
 /**
  * Used to manage configuration files.
