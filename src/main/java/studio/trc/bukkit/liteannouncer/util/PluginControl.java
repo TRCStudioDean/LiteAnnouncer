@@ -68,9 +68,10 @@ public class PluginControl
         
         if (usePlaceholderAPI()) {
             if (Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")) {
+                MessageUtil.setEnabledPAPI(true);
                 LiteAnnouncerProperties.sendOperationMessage("FindThePlaceholderAPI");
             } else {
-                ConfigurationUtil.getConfig(ConfigurationType.CONFIG).set("Use-PlaceholderAPI", false);
+                MessageUtil.setEnabledPAPI(false);
                 LiteAnnouncerProperties.sendOperationMessage("PlaceholderAPINotFound");
             }
         }
