@@ -41,3 +41,8 @@ And more...
 # Statistics
 [![BigImage](https://bstats.org/signatures/bukkit/LiteAnnouncer.svg)](https://bstats.org/plugin/bukkit/LiteAnnouncer)  
 [![BigImage](https://bstats.org/signatures/bungeecord/LiteAnnouncer.svg)](https://bstats.org/plugin/bungeecord/LiteAnnouncer)  
+
+## My Updating Plugins:
+**LiteSignIn: [https://www.spigotmc.org/resources/79584/](https://www.spigotmc.org/resources/79584/)**  
+**LiteCommandEditor: [https://www.spigotmc.org/resources/117987/](https://www.spigotmc.org/resources/117987/)**  
+**GlobalMarketPlus: [https://www.spigotmc.org/resources/103648/](https://www.spigotmc.org/resources/103648/)**

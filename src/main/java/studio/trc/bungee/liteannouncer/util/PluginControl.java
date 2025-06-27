@@ -126,14 +126,12 @@ public class PluginControl
                             ex.printStackTrace();
                         }
                     });
-                    List<Title> sequence = new LinkedList();
-                    config.getStringList("Announcements." + path + ".Titles.Task-Sequence").stream().filter(title -> titles.get(title) != null).forEach(title -> {
-                        sequence.add(titles.get(title));
-                    });
+                    List<Title> sequence = new ArrayList<>();
+                    config.getStringList("Announcements." + path + ".Titles.Task-Sequence").stream().filter(title -> titles.get(title) != null).forEach(title -> sequence.add(titles.get(title)));
                     announcement.setTitlesOfBroadcast(sequence);
                 }
                 if (config.get("Announcements." + path + ".ActionBars.Task-Sequence") != null && config.getBoolean("Announcements." + path + ".ActionBars.Enabled")) {
-                    List<ActionBar> actionbars = new LinkedList();
+                    List<ActionBar> actionbars = new ArrayList<>();
                     for (Map<String, Object> maps : (List<Map<String, Object>>) config.getList("Announcements." + path + ".ActionBars.Task-Sequence")) {
                         try {
                             double actionbarDelay = 0;

@@ -135,7 +135,7 @@ public class MessageUtil
      */
     public static List<BaseComponent> createJsonMessage(CommandSender sender, String message, Map<String, BaseComponent> baseComponents) {
         List<TextParagraph> splitedTexts = splitIntoComponentParagraphs(message, baseComponents);
-        List<BaseComponent> components = new LinkedList();
+        List<BaseComponent> components = new ArrayList<>();
         for (TextParagraph paragraph : splitedTexts) {
             if (paragraph.isPlaceholder()) {
                 components.add(paragraph.getComponent());
@@ -160,7 +160,7 @@ public class MessageUtil
      * @return 
      */
     public static List<TextParagraph> splitIntoParagraphs(String message, Map<String, String> placeholders) {
-        List<TextParagraph> splitedTexts = new LinkedList();
+        List<TextParagraph> splitedTexts = new ArrayList<>();
         splitedTexts.add(new TextParagraph(0, message.length(), message));
         for (String placeholder : placeholders.keySet()) {
             List<TextParagraph> newArray = new ArrayList();
@@ -207,7 +207,7 @@ public class MessageUtil
      * @return 
      */
     public static List<TextParagraph> splitIntoComponentParagraphs(String message, Map<String, BaseComponent> baseComponents) {
-        List<TextParagraph> splitedTexts = new LinkedList();
+        List<TextParagraph> splitedTexts = new ArrayList<>();
         splitedTexts.add(new TextParagraph(0, message.length(), new TextComponent(message)));
         for (String placeholder : baseComponents.keySet()) {
             List<TextParagraph> newArray = new ArrayList();

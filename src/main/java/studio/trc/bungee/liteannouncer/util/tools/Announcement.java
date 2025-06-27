@@ -1,11 +1,13 @@
 package studio.trc.bungee.liteannouncer.util.tools;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import lombok.Getter;
 
@@ -14,6 +16,8 @@ import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.TextComponent;
+import net.md_5.bungee.api.chat.hover.content.Content;
+import net.md_5.bungee.api.chat.hover.content.Text;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.config.Configuration;
 
@@ -38,9 +42,9 @@ public class Announcement
     @Getter
     private final List<String> whitelist;
     @Getter
-    private final List<Title> titlesOfBroadcast = new LinkedList();
+    private final List<Title> titlesOfBroadcast = new ArrayList<>();
     @Getter
-    private final List<ActionBar> actionBarsOfBroadcast = new LinkedList();
+    private final List<ActionBar> actionBarsOfBroadcast = new ArrayList<>();
     
     public Announcement(String configPath, String name, double delay, List<String> messages, String permission, List<String> whitelist) {
         this.configPath = configPath;
@@ -70,7 +74,8 @@ public class Announcement
                     BaseComponent bc = new TextComponent(MessageUtil.toLocallyPlaceholders(jsonComponent.getComponent().toPlainText(), player));
                     bc.setClickEvent(jsonComponent.getClickEvent());
                     bc.setHoverEvent(jsonComponent.getHoverEvent());
-                    BaseComponent[] hover = bc.getHoverEvent().getValue();
+                    Content content = bc.getHoverEvent().getContents().get(0);
+                    BaseComponent[] hover = (BaseComponent[]) ((Text) content).getValue();
                     for (int i = 0;i < hover.length;i++) {
                         hover[i] = new TextComponent(MessageUtil.toLocallyPlaceholders(hover[i].toPlainText(), player));
                     }
@@ -104,7 +109,7 @@ public class Announcement
                     actionBarsOfBroadcast.stream().map(actionbar -> {
                         player.sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(MessageUtil.toLocallyPlaceholders(actionbar.getText(), player)));
                         return actionbar;
-                    }).forEach((actionbar) -> {
+                    }).forEach(actionbar -> {
                         try {
                             Thread.sleep((long) (actionbar.getDelay() * 1000));
                         } catch (InterruptedException ex) {
@@ -116,9 +121,7 @@ public class Announcement
             }
         } else {
             messages.stream().forEach(message -> {
-                PluginControl.getJsonComponents().stream().forEach(jsonComponent -> {
-                    baseComponents.put(jsonComponent.getPlaceholder(), jsonComponent.getComponent());
-                });
+                PluginControl.getJsonComponents().stream().forEach(jsonComponent -> baseComponents.put(jsonComponent.getPlaceholder(), jsonComponent.getComponent()));
                 MessageUtil.sendJsonMessage(viewer, message, baseComponents);
             });
         }
@@ -134,7 +137,8 @@ public class Announcement
                     BaseComponent bc = new TextComponent(MessageUtil.toLocallyPlaceholders(jsonComponent.getComponent().toPlainText(), player));
                     bc.setClickEvent(jsonComponent.getClickEvent());
                     bc.setHoverEvent(jsonComponent.getHoverEvent());
-                    BaseComponent[] hover = bc.getHoverEvent().getValue();
+                    Content content = bc.getHoverEvent().getContents().get(0);
+                    BaseComponent[] hover = (BaseComponent[]) ((Text) content).getValue();
                     for (int i = 0;i < hover.length;i++) {
                         hover[i] = new TextComponent(MessageUtil.toLocallyPlaceholders(hover[i].toPlainText(), player));
                     }

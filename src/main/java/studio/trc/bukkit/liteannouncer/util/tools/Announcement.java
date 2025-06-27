@@ -1,8 +1,8 @@
 package studio.trc.bukkit.liteannouncer.util.tools;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -10,6 +10,8 @@ import lombok.Getter;
 
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.TextComponent;
+import net.md_5.bungee.api.chat.hover.content.Content;
+import net.md_5.bungee.api.chat.hover.content.Text;
 
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
@@ -37,9 +39,9 @@ public class Announcement
     @Getter
     private final List<String> messages;
     @Getter
-    private final List<Title> titlesOfBroadcast = new LinkedList();
+    private final List<Title> titlesOfBroadcast = new ArrayList<>();
     @Getter
-    private final List<ActionBar> actionBarsOfBroadcast = new LinkedList();
+    private final List<ActionBar> actionBarsOfBroadcast = new ArrayList<>();
     
     public Announcement(String configPath, String name, double delay, List<String> messages, String permission) {
         this.configPath = configPath;
@@ -67,7 +69,8 @@ public class Announcement
                     BaseComponent bc = new TextComponent(MessageUtil.toPlaceholderAPIResult(jsonComponent.getComponent().toPlainText(), viewer));
                     bc.setClickEvent(jsonComponent.getClickEvent());
                     bc.setHoverEvent(jsonComponent.getHoverEvent());
-                    BaseComponent[] hover = bc.getHoverEvent().getValue();
+                    Content content = bc.getHoverEvent().getContents().get(0);
+                    BaseComponent[] hover = (BaseComponent[]) ((Text) content).getValue();
                     for (int i = 0;i < hover.length;i++) {
                         hover[i] = new TextComponent(MessageUtil.toPlaceholderAPIResult(hover[i].toPlainText(), viewer));
                     }
@@ -124,7 +127,8 @@ public class Announcement
                     BaseComponent bc = new TextComponent(MessageUtil.toPlaceholderAPIResult(jsonComponent.getComponent().toPlainText(), player));
                     bc.setClickEvent(jsonComponent.getClickEvent());
                     bc.setHoverEvent(jsonComponent.getHoverEvent());
-                    BaseComponent[] hover = bc.getHoverEvent().getValue();
+                    Content content = bc.getHoverEvent().getContents().get(0);
+                    BaseComponent[] hover = (BaseComponent[]) ((Text) content).getValue();
                     for (int i = 0;i < hover.length;i++) {
                         hover[i] = new TextComponent(MessageUtil.toPlaceholderAPIResult(hover[i].toPlainText(), player));
                     }
