@@ -20,17 +20,17 @@ import studio.trc.bukkit.liteannouncer.message.MessageUtil;
 
 public class ConfigurationUtil
 {
-    private final static Map<ConfigurationType, Configuration> cacheConfig = new HashMap();
+    private final static Map<ConfigurationType, RobustConfiguration> cacheConfig = new HashMap();
     
     public static FileConfiguration getFileConfiguration(ConfigurationType fileType) {
         return ConfigurationUtil.getConfig(fileType).getRawConfig();
     }
     
-    public static Configuration getConfig(ConfigurationType fileType) {
+    public static RobustConfiguration getConfig(ConfigurationType fileType) {
         if (cacheConfig.containsKey(fileType)) {
             return cacheConfig.get(fileType);
         }
-        Configuration config = new Configuration(new YamlConfiguration(), fileType);
+        RobustConfiguration config = new RobustConfiguration(new YamlConfiguration(), fileType);
         cacheConfig.put(fileType, config);
         return config;
     }

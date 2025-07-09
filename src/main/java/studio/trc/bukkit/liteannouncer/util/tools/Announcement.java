@@ -1,17 +1,10 @@
 package studio.trc.bukkit.liteannouncer.util.tools;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 import lombok.Getter;
-
-import net.md_5.bungee.api.chat.BaseComponent;
-import net.md_5.bungee.api.chat.TextComponent;
-import net.md_5.bungee.api.chat.hover.content.Content;
-import net.md_5.bungee.api.chat.hover.content.Text;
 
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
@@ -62,22 +55,9 @@ public class Announcement
     }
     
     public void view(CommandSender viewer) {
-        Map<String, BaseComponent> baseComponents = new LinkedHashMap();
+        Map<String, String> placeholders = MessageUtil.getDefaultPlaceholders();
+        messages.stream().forEach(message -> MessageUtil.sendMixedMessage(viewer, message, placeholders, PluginControl.getCacheJSONComponent(), placeholders));
         if (viewer instanceof Player) {
-            messages.stream().forEach(message -> {
-                PluginControl.getJsonComponents().stream().forEach(jsonComponent -> {
-                    BaseComponent bc = new TextComponent(MessageUtil.toPlaceholderAPIResult(jsonComponent.getComponent().toPlainText(), viewer));
-                    bc.setClickEvent(jsonComponent.getClickEvent());
-                    bc.setHoverEvent(jsonComponent.getHoverEvent());
-                    Content content = bc.getHoverEvent().getContents().get(0);
-                    BaseComponent[] hover = (BaseComponent[]) ((Text) content).getValue();
-                    for (int i = 0;i < hover.length;i++) {
-                        hover[i] = new TextComponent(MessageUtil.toPlaceholderAPIResult(hover[i].toPlainText(), viewer));
-                    }
-                    baseComponents.put(jsonComponent.getPlaceholder(), bc);
-                });
-                MessageUtil.sendJSONMessage(viewer, MessageUtil.createJsonMessage(viewer, message, baseComponents));
-            });
             if (!titlesOfBroadcast.isEmpty()) {
                 Thread thread = new Thread(() -> {
                     titlesOfBroadcast.stream().map(title -> {
@@ -108,45 +88,15 @@ public class Announcement
                 }, "LiteAnnouncer-ActionBarThread");
                 thread.start();
             }
-        } else {
-            messages.stream().forEach(message -> {
-                PluginControl.getJsonComponents().stream().forEach(jsonComponent -> {
-                    baseComponents.put(jsonComponent.getPlaceholder(), jsonComponent.getComponent());
-                });
-                MessageUtil.sendJSONMessage(viewer, MessageUtil.createJsonMessage(viewer, message, baseComponents));
-            });
         }
     }
     
     public void broadcast() {
-        Map<String, BaseComponent> baseComponents = new HashMap();
-        messages.stream().forEach(message -> {
-            Bukkit.getOnlinePlayers().stream().filter(player -> !ignoreAnnouncement(player) && (permission != null ? player.hasPermission(permission) : true)).forEach(player -> {
-                baseComponents.clear();
-                PluginControl.getJsonComponents().stream().forEach(jsonComponent -> {
-                    BaseComponent bc = new TextComponent(MessageUtil.toPlaceholderAPIResult(jsonComponent.getComponent().toPlainText(), player));
-                    bc.setClickEvent(jsonComponent.getClickEvent());
-                    bc.setHoverEvent(jsonComponent.getHoverEvent());
-                    Content content = bc.getHoverEvent().getContents().get(0);
-                    BaseComponent[] hover = (BaseComponent[]) ((Text) content).getValue();
-                    for (int i = 0;i < hover.length;i++) {
-                        hover[i] = new TextComponent(MessageUtil.toPlaceholderAPIResult(hover[i].toPlainText(), player));
-                    }
-                    baseComponents.put(jsonComponent.getPlaceholder(), bc);
-                });
-                MessageUtil.sendJSONMessage(player, MessageUtil.createJsonMessage(player, message, baseComponents));
-            });
-        });
-        CommandSender console = Bukkit.getConsoleSender();
-        messages.stream().forEach(message -> {
-            if (PluginControl.enabledConsoleBroadcast()) {
-                baseComponents.clear();
-                PluginControl.getJsonComponents().stream().forEach(jsonComponent -> {
-                    baseComponents.put(jsonComponent.getPlaceholder(), jsonComponent.getComponent());
-                });
-                MessageUtil.sendJSONMessage(console, MessageUtil.createJsonMessage(console, message, baseComponents));
-            }
-        });
+        Map<String, String> placeholders = MessageUtil.getDefaultPlaceholders();
+        Bukkit.getOnlinePlayers().stream()
+            .filter(player -> !ignoreAnnouncement(player) && (permission != null ? player.hasPermission(permission) : true))
+            .forEach(player -> messages.stream().forEach(message -> MessageUtil.sendMixedMessage(player, message, placeholders, PluginControl.getCacheJSONComponent(), placeholders)));
+        messages.stream().forEach(message -> MessageUtil.sendMixedMessage(Bukkit.getConsoleSender(), message, placeholders, PluginControl.getCacheJSONComponent(), placeholders));
         if (!titlesOfBroadcast.isEmpty() && !Bukkit.getOnlinePlayers().isEmpty()) {
             Thread thread = new Thread(() -> {
                 titlesOfBroadcast.stream().map(title -> {

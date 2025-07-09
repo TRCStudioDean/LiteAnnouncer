@@ -2,18 +2,13 @@ package studio.trc.bukkit.liteannouncer.util;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import net.md_5.bungee.api.ChatColor;
-import net.md_5.bungee.api.chat.BaseComponent;
-import net.md_5.bungee.api.chat.ClickEvent;
-import net.md_5.bungee.api.chat.HoverEvent;
-import net.md_5.bungee.api.chat.TextComponent;
+import lombok.Getter;
 
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
@@ -21,21 +16,21 @@ import org.bukkit.plugin.Plugin;
 
 import studio.trc.bukkit.liteannouncer.Main;
 import studio.trc.bukkit.liteannouncer.util.tools.Announcement;
-import studio.trc.bukkit.liteannouncer.util.tools.JSONComponent;
 import studio.trc.bukkit.liteannouncer.async.AnnouncerThread;
-import studio.trc.bukkit.liteannouncer.configuration.Configuration;
+import studio.trc.bukkit.liteannouncer.configuration.RobustConfiguration;
 import studio.trc.bukkit.liteannouncer.configuration.ConfigurationType;
 import studio.trc.bukkit.liteannouncer.configuration.ConfigurationUtil;
+import studio.trc.bukkit.liteannouncer.message.JSONComponent;
 import studio.trc.bukkit.liteannouncer.util.tools.ActionBar;
 import studio.trc.bukkit.liteannouncer.util.tools.Title;
 import studio.trc.bukkit.liteannouncer.message.MessageUtil;
-import studio.trc.bukkit.liteannouncer.message.color.ColorUtils;
 
 public class PluginControl
 {
     private static AnnouncerThread thread = null;
     private static final List<Announcement> cacheAnnouncement = new ArrayList();
-    private static final List<JSONComponent> cacheJSONComponent = new ArrayList();
+    @Getter
+    private static final Map<String, JSONComponent> cacheJSONComponent = new HashMap<>();
     
     public static boolean hasPermission(CommandSender sender, String path) {
         if (ConfigurationUtil.getConfig(ConfigurationType.CONFIG).getBoolean(path + ".Default")) return true;
@@ -65,6 +60,7 @@ public class PluginControl
     public static void reload() {
         ConfigurationUtil.reloadConfig();
         MessageUtil.loadPlaceholders();
+        MessageUtil.setAdventureAvailable();
         
         if (usePlaceholderAPI()) {
             if (Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")) {
@@ -115,7 +111,7 @@ public class PluginControl
     
     public static void reloadAnnouncements() {
         cacheAnnouncement.clear();
-        Configuration config = ConfigurationUtil.getConfig(ConfigurationType.ANNOUNCEMENTS);
+        RobustConfiguration config = ConfigurationUtil.getConfig(ConfigurationType.ANNOUNCEMENTS);
         for (String path : config.getConfigurationSection("Announcements").getKeys(false)) {
             try {
                 String name = config.getString("Announcements." + path + ".Name");
@@ -184,34 +180,17 @@ public class PluginControl
     
     public static void reloadJSONComponents() {
         cacheJSONComponent.clear();
-        Configuration config = ConfigurationUtil.getConfig(ConfigurationType.COMPONENTS);
+        RobustConfiguration config = ConfigurationUtil.getConfig(ConfigurationType.COMPONENTS);
         config.getConfigurationSection("Json-Components").getKeys(false).stream().forEach(path -> {
             try {
-                String placeholder = config.getString("Json-Components." + path + ".Placeholder");
-                HoverEvent he = null;
-                ClickEvent ce = null;
-                if (config.contains("Json-Components." + path + ".HoverEvent")) {
-                    List<BaseComponent> hoverText = new ArrayList();
-                    int end = 0;
-                    List<String> array = config.getStringList("Json-Components." + path + ".HoverEvent.Hover-Values");
-                    for (String hover : array) {
-                        end++;
-                        hoverText.add(new TextComponent(ColorUtils.toColor(hover)));
-                        if (end != array.size()) {
-                            hoverText.add(new TextComponent("\n"));
-                        }
-                    }
-                    he = new HoverEvent(HoverEvent.Action.valueOf(config.getString("Json-Components." + path + ".HoverEvent.Action").toUpperCase()), hoverText.toArray(new BaseComponent[0]));
-                }
-                
-                if (config.contains("Json-Components." + path + ".ClickEvent")) {
-                    ce = new ClickEvent(ClickEvent.Action.valueOf(config.getString("Json-Components." + path + ".ClickEvent.Action").toUpperCase()), config.getString("Json-Components." + path + ".ClickEvent.Value"));
-                }
-                BaseComponent bc = new TextComponent(ChatColor.translateAlternateColorCodes('&', config.getString("Json-Components." + path + ".Text")).replace("{prefix}", MessageUtil.getPrefix()));
-                if (he != null) bc.setHoverEvent(he);
-                if (ce != null) bc.setClickEvent(ce);
-                JSONComponent jc = new JSONComponent(placeholder, bc);
-                cacheJSONComponent.add(jc);
+                Map<String, String> placeholders = MessageUtil.getDefaultPlaceholders();
+                JSONComponent component = new JSONComponent(
+                    MessageUtil.replacePlaceholders(config.getString("Json-Components." + path + ".Text"), placeholders),
+                    config.getStringList("Json-Components." + path + ".HoverEvent.Hover-Values").stream().map(line -> MessageUtil.replacePlaceholders(line, placeholders)).collect(Collectors.toList()),
+                    config.getString("Json-Components." + path + ".ClickEvent.Action").toUpperCase(),
+                    config.getString("Json-Components." + path + ".ClickEvent.Value")
+                );
+                cacheJSONComponent.put(config.getString("Json-Components." + path + ".Placeholder"), component);
             } catch (Exception ex) {
                 Map<String, String> placeholders = MessageUtil.getDefaultPlaceholders();
                 placeholders.put("{exception}", ex.getLocalizedMessage() != null ? ex.getLocalizedMessage() : "null");
@@ -250,10 +229,6 @@ public class PluginControl
                 .map(announcement -> cacheAnnouncement.stream().filter(loadedAnnouncement -> loadedAnnouncement.getConfigPath().equals(announcement)).findFirst().orElse(null))
                 .filter(element -> element != null)
                 .collect(Collectors.toList());
-    }
-    
-    public static List<JSONComponent> getJsonComponents() {
-        return cacheJSONComponent;
     }
     
     public static void runBukkitTask(Runnable task, long delay) {

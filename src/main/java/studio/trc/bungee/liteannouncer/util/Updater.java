@@ -95,7 +95,7 @@ public class Updater
         checkUpdateThread = new Thread(() -> {
             ProxyServer proxy = ProxyServer.getInstance();
             try {
-                URL url = new URL("https://trc.studio/resources/spigot/liteannouncer/update.yml");
+                URL url = new URL("https://api.trc.studio/resources/spigot/liteannouncer/update.yml");
                 try (Reader reader = new InputStreamReader(url.openStream(), "UTF-8")) {
                     Configuration yaml = ConfigurationUtil.provider.load(reader);
                     String version = yaml.getString("latest-version");

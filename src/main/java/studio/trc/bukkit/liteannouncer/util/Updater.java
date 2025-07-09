@@ -6,16 +6,8 @@ import java.io.Reader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-
-import net.md_5.bungee.api.chat.BaseComponent;
-import net.md_5.bungee.api.chat.ClickEvent;
-import net.md_5.bungee.api.chat.HoverEvent;
-import net.md_5.bungee.api.chat.TextComponent;
 
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.InvalidConfigurationException;
@@ -27,6 +19,7 @@ import org.bukkit.event.player.PlayerJoinEvent;
 
 import studio.trc.bukkit.liteannouncer.configuration.ConfigurationType;
 import studio.trc.bukkit.liteannouncer.configuration.ConfigurationUtil;
+import studio.trc.bukkit.liteannouncer.message.JSONComponent;
 import studio.trc.bukkit.liteannouncer.message.color.ColorUtils;
 import studio.trc.bukkit.liteannouncer.message.MessageUtil;
 
@@ -53,39 +46,19 @@ public class Updater
         if (Updater.isFoundANewVersion() && PluginControl.enableUpdater()) {
             if (PluginControl.hasPermission(player, "Permissions.Updater")) {
                 String nowVersion = Bukkit.getPluginManager().getPlugin("LiteAnnouncer").getDescription().getVersion();
+                Map<String, String> placeholders = MessageUtil.getDefaultPlaceholders();
+                placeholders.put("{nowVersion}", nowVersion);
+                placeholders.put("{version}", Updater.getNewVersion());
+                placeholders.put("{link}", Updater.getLink());
+                placeholders.put("{description}", Updater.getDescription());
+                JSONComponent component = new JSONComponent(
+                    ColorUtils.toColor(MessageUtil.getMessage("Updater.Link.Message")),
+                    MessageUtil.getMessageList("Updater.Link.Hover-Text"),
+                    "OPEN_URL",
+                    Updater.getLink()
+                );
                 MessageUtil.getMessageList("Updater.Checked").stream().forEach(text -> {
-                    if (text.toLowerCase().contains("%link%")) {
-                        BaseComponent click = new TextComponent(ColorUtils.toColor(MessageUtil.getMessage("Updater.Link.Message")));
-                        List<BaseComponent> hoverText = new ArrayList();
-                        int end = 0;
-                        List<String> array = MessageUtil.getMessageList("Updater.Link.Hover-Text");
-                        for (String hover : array) {
-                            end++;
-                            Map<String, String> placeholders = MessageUtil.getDefaultPlaceholders();
-                            placeholders.put("{nowVersion}", nowVersion);
-                            placeholders.put("{version}", Updater.getNewVersion());
-                            placeholders.put("{link}", Updater.getLink());
-                            placeholders.put("{description}", Updater.getDescription());
-                            hoverText.add(new TextComponent(MessageUtil.replacePlaceholders(player, hover, placeholders)));
-                            if (end != array.size()) {
-                                hoverText.add(new TextComponent("\n"));
-                            }
-                        }
-                        HoverEvent he = new HoverEvent(HoverEvent.Action.SHOW_TEXT, hoverText.toArray(new BaseComponent[] {}));
-                        ClickEvent ce = new ClickEvent(ClickEvent.Action.OPEN_URL, Updater.getLink());
-                        click.setClickEvent(ce);
-                        click.setHoverEvent(he);
-                        Map<String, BaseComponent> baseComponents = new HashMap();
-                        baseComponents.put("%link%", click);
-                        MessageUtil.sendJSONMessage(player, MessageUtil.createJsonMessage(player, text, baseComponents));
-                    } else {
-                        Map<String, String> placeholders = MessageUtil.getDefaultPlaceholders();
-                            placeholders.put("{nowVersion}", nowVersion);
-                            placeholders.put("{version}", Updater.getNewVersion());
-                            placeholders.put("{link}", Updater.getLink());
-                            placeholders.put("{description}", Updater.getDescription());
-                        MessageUtil.sendMessage(player, text, placeholders);
-                    }
+                    MessageUtil.sendMessageWithJSONComponent(player, text, placeholders, "%link%", component);
                 });
             }
         }
@@ -97,7 +70,7 @@ public class Updater
     public static void initialize() {
         checkUpdateThread = new Thread(() -> {
             try {
-                URL url = new URL("https://trc.studio/resources/spigot/liteannouncer/update.yml");
+                URL url = new URL("https://api.trc.studio/resources/spigot/liteannouncer/update.yml");
                 try (Reader reader = new InputStreamReader(url.openStream(), "UTF-8")) {
                     YamlConfiguration yaml = new YamlConfiguration();
                     yaml.load(reader);

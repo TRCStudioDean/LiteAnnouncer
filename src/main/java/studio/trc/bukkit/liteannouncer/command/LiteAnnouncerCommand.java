@@ -89,9 +89,7 @@ public class LiteAnnouncerCommand
                     }
                     Map<String, String> placeholders = MessageUtil.getDefaultPlaceholders();
                     List<String> name = new ArrayList();
-                    PluginControl.getAnnouncements().stream().forEach(announcement -> {
-                        name.add(announcement.getName());
-                    });
+                    PluginControl.getAnnouncements().stream().forEach(announcement -> name.add(announcement.getName()));
                     placeholders.put("{list}", name.toString().substring(1, name.toString().length() - 1));
                     MessageUtil.sendCommandMessage(sender, "List", placeholders);
                     return true;

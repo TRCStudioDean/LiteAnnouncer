@@ -6,7 +6,7 @@ Json-Components:
     example:
         #佔位符&變量名稱
         Placeholder: '%example_json_component%'
-        #本文信息
+        #文本信息
         Text: '&a[Json信息示範]'
         #點擊事件
         ClickEvent:
@@ -18,7 +18,7 @@ Json-Components:
             # SUGGEST_COMMAND: 點擊將命令填充到客戶端的消息欄中
             # CHANGE_PAGE: 點擊切換書本的頁面
             # COPY_TO_CLIPBOARD: 點擊將指定文字複製到剪貼板
-            Action: RUN_COMMAND
+            Action: SUGGEST_COMMAND
             #點擊事件的目標值
             Value: '/say hello!'
         HoverEvent:

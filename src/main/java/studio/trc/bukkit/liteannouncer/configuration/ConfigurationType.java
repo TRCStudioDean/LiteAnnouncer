@@ -36,4 +36,8 @@ public enum ConfigurationType
     public String getFileName() {
         return fileName;
     }
+    
+    public RobustConfiguration getRobustConfig() {
+        return ConfigurationUtil.getConfig(this);
+    }
 }

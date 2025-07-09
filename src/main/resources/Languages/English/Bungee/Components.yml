@@ -14,7 +14,7 @@ Json-Components:
             #  SUGGEST_COMMAND: Click to fill command/message in the chat bar
             #  CHANGE_PAGE: Click to change the book page.
             #  COPY_TO_CLIPBOARD: Click to copy to clipboard.
-            Action: RUN_COMMAND
+            Action: SUGGEST_COMMAND
             #Target value.
             Value: '/say hello!'
         #Hover event.

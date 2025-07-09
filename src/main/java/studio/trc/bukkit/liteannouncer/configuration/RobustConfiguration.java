@@ -14,12 +14,12 @@ import studio.trc.bukkit.liteannouncer.message.MessageUtil;
  * Used to manage configuration files.
  * @author Dean
  */
-public class Configuration
+public class RobustConfiguration
 {
     private final FileConfiguration config;
     private final ConfigurationType type;
     
-    public Configuration(FileConfiguration config, ConfigurationType type) {
+    public RobustConfiguration(FileConfiguration config, ConfigurationType type) {
         this.config = config;
         this.type = type;
     }
