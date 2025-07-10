@@ -264,14 +264,14 @@ public class MessageUtil
         } catch (Exception ex) {
             ex.printStackTrace();
         }
-        return ColorUtils.toColor(message);
+        return ColorUtils.toColor(toPlaceholderAPIResult(sender, message));
     }
     
     public static String escape(String text) {
         return text.replace("\\", "\\\\").replace("(", "\\(").replace(")", "\\)").replace("[", "\\[").replace("]", "\\]").replace("{", "\\{").replace("}", "\\}").replace("+", "\\+").replace("*", "\\*").replace("|", "\\|").replace("?", "\\?").replace("$", "\\$").replace("^", "\\^");
     }
     
-    public static String toPlaceholderAPIResult(String text, CommandSender sender) {
+    public static String toPlaceholderAPIResult(CommandSender sender, String text) {
         return text != null && isEnabledPAPI() && sender instanceof Player ? PlaceholderAPI.setPlaceholders((Player) sender, text) : text;
     }
     
