@@ -18,7 +18,8 @@ public class ActionBarUtil
 {
     public static Class<?> chatComponentText;
     public static Class<?> packetPlayOutChat;
-    public static Class<?> interfaceChatBaseComponent;
+    public static Class<?> interfaceChatBaseComponent = null;
+    public static Class<?> component; // 1.21.9+ added
     public static Class<?> chatMessageType;
     public static Class<?> clientboundSetActionBarTextPacket;
     public static Class<?> craftChatMessage;
@@ -28,24 +29,32 @@ public class ActionBarUtil
     
     public static void initialize() {
         try {
-            if (Bukkit.getBukkitVersion().startsWith("1.17") || Bukkit.getBukkitVersion().startsWith("1.18") || Bukkit.getBukkitVersion().startsWith("1.19") || Bukkit.getBukkitVersion().startsWith("1.20") || Bukkit.getBukkitVersion().startsWith("1.21")) {
-                chatMessageType = Class.forName("net.minecraft.network.chat.ChatMessageType");
-                interfaceChatBaseComponent = Class.forName("net.minecraft.network.chat.IChatBaseComponent");
-                packet = Class.forName("net.minecraft.network.protocol.Packet");
-                clientboundSetActionBarTextPacket = Class.forName("net.minecraft.network.protocol.game.ClientboundSetActionBarTextPacket");
-                craftChatMessage = Class.forName("org.bukkit.craftbukkit" + getPackagePath() + "util.CraftChatMessage");
-            } else {
-                interfaceChatBaseComponent = Class.forName("net.minecraft.server" + getPackagePath() + "IChatBaseComponent");
-                packet = Class.forName("net.minecraft.server" + getPackagePath() + "Packet");
-                packetPlayOutChat = Class.forName("net.minecraft.server" + getPackagePath() + "PacketPlayOutChat");
-                chatComponentText = Class.forName("net.minecraft.server" + getPackagePath() + "ChatComponentText"); 
-            }
-            if (Bukkit.getBukkitVersion().startsWith("1.12") || Bukkit.getBukkitVersion().startsWith("1.13") || Bukkit.getBukkitVersion().startsWith("1.14") || Bukkit.getBukkitVersion().startsWith("1.15") || Bukkit.getBukkitVersion().startsWith("1.16")) {
-                chatMessageType = Class.forName("net.minecraft.server" + getPackagePath() + "ChatMessageType");
-            }
-            craftPlayer = Class.forName("org.bukkit.craftbukkit" + getPackagePath() + "entity.CraftPlayer");
+            Player.class.getMethod("sendActionBar", String.class);
         } catch (Exception ex) {
-            ex.printStackTrace();
+            try {
+                if (Bukkit.getBukkitVersion().startsWith("1.17") || Bukkit.getBukkitVersion().startsWith("1.18") || Bukkit.getBukkitVersion().startsWith("1.19") || Bukkit.getBukkitVersion().startsWith("1.20") || Bukkit.getBukkitVersion().startsWith("1.21")) {
+                    chatMessageType = Class.forName("net.minecraft.network.chat.ChatMessageType");
+                    packet = Class.forName("net.minecraft.network.protocol.Packet");
+                    clientboundSetActionBarTextPacket = Class.forName("net.minecraft.network.protocol.game.ClientboundSetActionBarTextPacket");
+                    craftChatMessage = Class.forName("org.bukkit.craftbukkit" + getPackagePath() + "util.CraftChatMessage");
+                    try {
+                        interfaceChatBaseComponent = Class.forName("net.minecraft.network.chat.IChatBaseComponent");
+                    } catch (Exception ex1) {
+                        component = Class.forName("net.minecraft.network.chat.Component");
+                    }
+                } else {
+                    interfaceChatBaseComponent = Class.forName("net.minecraft.server" + getPackagePath() + "IChatBaseComponent");
+                    packet = Class.forName("net.minecraft.server" + getPackagePath() + "Packet");
+                    packetPlayOutChat = Class.forName("net.minecraft.server" + getPackagePath() + "PacketPlayOutChat");
+                    chatComponentText = Class.forName("net.minecraft.server" + getPackagePath() + "ChatComponentText"); 
+                }
+                if (Bukkit.getBukkitVersion().startsWith("1.12") || Bukkit.getBukkitVersion().startsWith("1.13") || Bukkit.getBukkitVersion().startsWith("1.14") || Bukkit.getBukkitVersion().startsWith("1.15") || Bukkit.getBukkitVersion().startsWith("1.16")) {
+                    chatMessageType = Class.forName("net.minecraft.server" + getPackagePath() + "ChatMessageType");
+                }
+                craftPlayer = Class.forName("org.bukkit.craftbukkit" + getPackagePath() + "entity.CraftPlayer");
+            } catch (Exception exception) {
+                exception.printStackTrace();
+            }
         }
     }
     
@@ -79,7 +88,12 @@ public class ActionBarUtil
                     actionbar = clientboundSetActionBarTextPacket.getConstructor(interfaceChatBaseComponent).newInstance(craftChatMessage.getMethod("fromStringOrNull", String.class).invoke(null, text));
                 // 1.19 +
                 } else {
-                    actionbar = clientboundSetActionBarTextPacket.getConstructor(interfaceChatBaseComponent).newInstance(Array.get(craftChatMessage.getMethod("fromString", String.class).invoke(null, text), 0));
+                    // 1.19 - 1.21.8
+                    if (interfaceChatBaseComponent != null) {
+                        actionbar = clientboundSetActionBarTextPacket.getConstructor(interfaceChatBaseComponent).newInstance(Array.get(craftChatMessage.getMethod("fromString", String.class).invoke(null, text), 0));
+                    } else { // 1.21.9 +
+                        actionbar = clientboundSetActionBarTextPacket.getConstructor(component).newInstance(Array.get(craftChatMessage.getMethod("fromString", String.class).invoke(null, text), 0));
+                    }
                 }
                 sendPacket(player, actionbar);
             } catch (Exception ex1) {

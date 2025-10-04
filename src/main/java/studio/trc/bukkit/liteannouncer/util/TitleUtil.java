@@ -26,26 +26,30 @@ public class TitleUtil
     
     public static void initialize() {
         try {
-            if (Bukkit.getBukkitVersion().startsWith("1.8-R0.1")) {
-                enumTitleAction = Class.forName("net.minecraft.server" + getPackagePath() + "EnumTitleAction");
-                enumPlayerInfoAction = Class.forName("net.minecraft.server" + getPackagePath() + "EnumPlayerInfoAction");
-            } else if (Bukkit.getBukkitVersion().startsWith("1.8") || Bukkit.getBukkitVersion().startsWith("1.9") || Bukkit.getBukkitVersion().startsWith("1.10") || Bukkit.getBukkitVersion().startsWith("1.11") || Bukkit.getBukkitVersion().startsWith("1.12") || Bukkit.getBukkitVersion().startsWith("1.13") || Bukkit.getBukkitVersion().startsWith("1.14") || Bukkit.getBukkitVersion().startsWith("1.15") || Bukkit.getBukkitVersion().startsWith("1.16")) {
-                enumTitleAction = Class.forName("net.minecraft.server" + getPackagePath() + "PacketPlayOutTitle$EnumTitleAction");
-                enumPlayerInfoAction = Class.forName("net.minecraft.server" + getPackagePath() + "PacketPlayOutPlayerInfo$EnumPlayerInfoAction");
-            }
-            if (Bukkit.getBukkitVersion().startsWith("1.17") || Bukkit.getBukkitVersion().startsWith("1.18") || Bukkit.getBukkitVersion().startsWith("1.19") || Bukkit.getBukkitVersion().startsWith("1.20") || Bukkit.getBukkitVersion().startsWith("1.21")) {
-                interfaceChatBaseComponent = Class.forName("net.minecraft.network.chat.IChatBaseComponent");
-                packet = Class.forName("net.minecraft.network.protocol.Packet");
-                craftChatMessage = Class.forName("org.bukkit.craftbukkit" + getPackagePath() + "util.CraftChatMessage");
-            } else if (!Bukkit.getBukkitVersion().startsWith("1.7")) {
-                interfaceChatBaseComponent = Class.forName("net.minecraft.server" + getPackagePath() + "IChatBaseComponent");
-                packet = Class.forName("net.minecraft.server" + getPackagePath() + "Packet");
-                packetPlayOutTitle = Class.forName("net.minecraft.server" + getPackagePath() + "PacketPlayOutTitle");
-                craftChatMessage = Class.forName("org.bukkit.craftbukkit" + getPackagePath() + "util.CraftChatMessage");
-            }
-            craftPlayer = Class.forName("org.bukkit.craftbukkit" + getPackagePath() + "entity.CraftPlayer");
+            Player.class.getMethod("sendTitle", String.class, String.class, int.class, int.class, int.class);
         } catch (Exception ex) {
-            ex.printStackTrace();
+            try {
+                if (Bukkit.getBukkitVersion().startsWith("1.8-R0.1")) {
+                    enumTitleAction = Class.forName("net.minecraft.server" + getPackagePath() + "EnumTitleAction");
+                    enumPlayerInfoAction = Class.forName("net.minecraft.server" + getPackagePath() + "EnumPlayerInfoAction");
+                } else if (Bukkit.getBukkitVersion().startsWith("1.8") || Bukkit.getBukkitVersion().startsWith("1.9") || Bukkit.getBukkitVersion().startsWith("1.10") || Bukkit.getBukkitVersion().startsWith("1.11") || Bukkit.getBukkitVersion().startsWith("1.12") || Bukkit.getBukkitVersion().startsWith("1.13") || Bukkit.getBukkitVersion().startsWith("1.14") || Bukkit.getBukkitVersion().startsWith("1.15") || Bukkit.getBukkitVersion().startsWith("1.16")) {
+                    enumTitleAction = Class.forName("net.minecraft.server" + getPackagePath() + "PacketPlayOutTitle$EnumTitleAction");
+                    enumPlayerInfoAction = Class.forName("net.minecraft.server" + getPackagePath() + "PacketPlayOutPlayerInfo$EnumPlayerInfoAction");
+                }
+                if (Bukkit.getBukkitVersion().startsWith("1.17") || Bukkit.getBukkitVersion().startsWith("1.18") || Bukkit.getBukkitVersion().startsWith("1.19") || Bukkit.getBukkitVersion().startsWith("1.20") || Bukkit.getBukkitVersion().startsWith("1.21")) {
+                    interfaceChatBaseComponent = Class.forName("net.minecraft.network.chat.IChatBaseComponent");
+                    packet = Class.forName("net.minecraft.network.protocol.Packet");
+                    craftChatMessage = Class.forName("org.bukkit.craftbukkit" + getPackagePath() + "util.CraftChatMessage");
+                } else if (!Bukkit.getBukkitVersion().startsWith("1.7")) {
+                    interfaceChatBaseComponent = Class.forName("net.minecraft.server" + getPackagePath() + "IChatBaseComponent");
+                    packet = Class.forName("net.minecraft.server" + getPackagePath() + "Packet");
+                    packetPlayOutTitle = Class.forName("net.minecraft.server" + getPackagePath() + "PacketPlayOutTitle");
+                    craftChatMessage = Class.forName("org.bukkit.craftbukkit" + getPackagePath() + "util.CraftChatMessage");
+                }
+                craftPlayer = Class.forName("org.bukkit.craftbukkit" + getPackagePath() + "entity.CraftPlayer");
+            } catch (Exception exception) {
+                exception.printStackTrace();
+            }
         }
     }
     
