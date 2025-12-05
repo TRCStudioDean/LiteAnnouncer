@@ -96,7 +96,9 @@ public class Announcement
         Bukkit.getOnlinePlayers().stream()
             .filter(player -> !ignoreAnnouncement(player) && (permission != null ? player.hasPermission(permission) : true))
             .forEach(player -> messages.stream().forEach(message -> MessageUtil.sendMixedMessage(player, message, placeholders, PluginControl.getCacheJSONComponent(), placeholders)));
-        messages.stream().forEach(message -> MessageUtil.sendMixedMessage(Bukkit.getConsoleSender(), message, placeholders, PluginControl.getCacheJSONComponent(), placeholders));
+        if (PluginControl.enabledConsoleBroadcast()) {
+            messages.stream().forEach(message -> MessageUtil.sendMixedMessage(Bukkit.getConsoleSender(), message, placeholders, PluginControl.getCacheJSONComponent(), placeholders));
+        }
         if (!titlesOfBroadcast.isEmpty() && !Bukkit.getOnlinePlayers().isEmpty()) {
             Thread thread = new Thread(() -> {
                 titlesOfBroadcast.stream().map(title -> {
